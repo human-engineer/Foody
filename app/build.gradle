@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: "kotlin-kapt"
 apply plugin: 'kotlin-android-extensions'
 apply plugin: "androidx.navigation.safeargs.kotlin"
 
@@ -27,6 +28,17 @@ android {
         sourceCompatibility 1.8
         targetCompatibility 1.8
     }
+
+    dataBinding {
+        enabled = true
+    }
+
+//    javaCompileOptions {
+//        annotationProcessorOptions {
+//            arguments = ["room.incremental":"true"]
+//        }
+//    }
+
 }
 
 dependencies {
