@@ -14,6 +14,7 @@ class RecipesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         val binding = FragmentRecipeBinding.inflate(inflater, container, false)
         return binding.root
     }

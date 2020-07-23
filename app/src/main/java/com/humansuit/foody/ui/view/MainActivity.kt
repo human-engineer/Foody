@@ -6,11 +6,15 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
+import androidx.databinding.DataBindingUtil
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
-import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.humansuit.foody.R
+import com.humansuit.foody.databinding.ActivityMainBinding
+import com.humansuit.foody.network.RecipesApi
+import com.humansuit.foody.network.RecipesApiFactory
+import com.humansuit.foody.repository.RecipesRepository
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
@@ -22,21 +26,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-
-        /*val recipeService = RecipesApiFactory.makeRetrofitService()
-
-        GlobalScope.launch(Dispatchers.IO) {
-            val response = recipeService.getRecipesByType(type = "dessert")
-            if (response.isSuccessful) {
-                launch(Dispatchers.Main) {
-                    Log.e("ONCREATE", "onCreate: ${response.body()?.contentLength()}")
-                }
-            }
-        }*/
-
-
+        val binding : ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         setupDrawerLayout()
         setupBottomNavigationView()
 
@@ -44,7 +35,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
     private fun setupBottomNavigationView() {
-        NavigationUI.setupWithNavController(bottomNavigationView, navController)
+        NavigationUI.setupWithNavController(
+            bottomNavigationView,
+            navController
+        )
     }
 
 
@@ -54,8 +48,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             drawerLayout,
             toolbar,
             0,
-            0)
-
+            0
+        )
 
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()

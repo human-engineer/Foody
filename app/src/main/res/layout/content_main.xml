@@ -19,7 +19,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimary"
+            android:background="#ffdcb0"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
             <LinearLayout
@@ -33,7 +33,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Navigation Drawer"
-                    android:textColor="#FFFFFF" />
+                    android:textColor="@android:color/black" />
             </LinearLayout>
         </androidx.appcompat.widget.Toolbar>
 

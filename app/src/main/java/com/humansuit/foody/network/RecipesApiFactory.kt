@@ -10,12 +10,12 @@ object RecipesApiFactory {
 
     private const val RECIPES_BASE_URL = "https://api.spoonacular.com/recipes/"
 
-    fun makeRetrofitService(): RecipeService {
+    fun makeRetrofitService(): RecipesService {
         return Retrofit.Builder()
             .baseUrl(RECIPES_BASE_URL)
             .client(makeOkHttpClient())
             .addConverterFactory(MoshiConverterFactory.create())
-            .build().create(RecipeService::class.java)
+            .build().create(RecipesService::class.java)
     }
 
 
