@@ -12,22 +12,20 @@ import androidx.navigation.ui.NavigationUI
 import com.google.android.material.navigation.NavigationView
 import com.humansuit.foody.R
 import com.humansuit.foody.databinding.ActivityMainBinding
-import com.humansuit.foody.network.RecipesApi
-import com.humansuit.foody.network.RecipesApiFactory
-import com.humansuit.foody.repository.RecipesRepository
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_main.*
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
 
     private val navController by lazy { findNavController(R.id.navHostFragment) }
+    private lateinit var binding: ActivityMainBinding
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val binding : ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         setupDrawerLayout()
         setupBottomNavigationView()
 
@@ -36,24 +34,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun setupBottomNavigationView() {
         NavigationUI.setupWithNavController(
-            bottomNavigationView,
+            binding.mainContent.bottomNavigationView,
             navController
         )
     }
 
 
     private fun setupDrawerLayout() {
-        val toggle = ActionBarDrawerToggle(
-            this,
-            drawerLayout,
-            toolbar,
-            0,
-            0
-        )
-
-        drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-        navigationView.setNavigationItemSelectedListener(this)
+        binding.apply {
+            val toggle = ActionBarDrawerToggle(
+                this@MainActivity,
+                binding.drawerLayout,
+                binding.mainContent.toolbar,
+                0,
+                0
+            )
+            drawerLayout.addDrawerListener(toggle)
+            toggle.syncState()
+            navigationView.setNavigationItemSelectedListener(this@MainActivity)
+        }
     }
 
 
@@ -76,7 +75,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
-        drawerLayout.closeDrawer(GravityCompat.START)
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
 

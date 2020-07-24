@@ -1,7 +1,11 @@
 package com.humansuit.foody.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "recipe")
 data class Recipe(
-    val id : Int,
+    @PrimaryKey val id : Int,
     val title : String,
     val image : String,
     val imageType : String

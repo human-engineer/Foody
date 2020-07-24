@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: "kotlin-kapt"
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'dagger.hilt.android.plugin'
 apply plugin: "androidx.navigation.safeargs.kotlin"
 
 android {
@@ -37,6 +38,10 @@ android {
         dataBinding = true
     }
 
+    packagingOptions {
+        exclude 'META-INF/atomicfu.kotlin_module'
+    }
+
 //    javaCompileOptions {
 //        annotationProcessorOptions {
 //            arguments = ["room.incremental":"true"]
@@ -51,6 +56,7 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.3.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
@@ -60,8 +66,8 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-moshi:2.9.0'
 
     //OkHttp
-    implementation 'com.squareup.okhttp3:okhttp:4.7.2'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
+    implementation 'com.squareup.okhttp3:okhttp:4.8.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.8.0'
     
     //For Retrofit
     implementation "com.github.skydoves:sandwich:1.0.3"
@@ -79,11 +85,24 @@ dependencies {
 
     //ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0-alpha05"
+    implementation 'androidx.fragment:fragment-ktx:1.2.5'
     //LifecycleScope
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.0-alpha05"
     // LiveData
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.3.0-alpha05"
     implementation "androidx.lifecycle:lifecycle-common-java8:2.3.0-alpha05"
 
+
+    //Dagger-Hilt
+    implementation 'com.google.dagger:hilt-android:2.28.3-alpha'
+    kapt 'com.google.dagger:hilt-android-compiler:2.28.3-alpha'
+    implementation 'androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha02'
+    kapt 'androidx.hilt:hilt-compiler:1.0.0-alpha02'
+
+
+    //Room
+    implementation "androidx.room:room-runtime:2.2.5"
+    kapt "androidx.room:room-compiler:2.2.5"
+    implementation "androidx.room:room-ktx:2.2.5"
 
 }

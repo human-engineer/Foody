@@ -5,7 +5,7 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.humansuit.foody.ui.view.MainFragment"
+        android:name="com.humansuit.foody.ui.view.LoungeFragment"
         android:label="MainFragment" />
     <fragment
         android:id="@+id/recipesFragment"
