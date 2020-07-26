@@ -3,6 +3,7 @@ package com.humansuit.foody.di.module
 import com.humansuit.foody.network.RecipeApi
 import com.humansuit.foody.network.RecipeService
 import com.humansuit.foody.utils.Constants.RECIPES_BASE_URL
+import com.skydoves.sandwich.coroutines.CoroutinesResponseCallAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,6 +27,7 @@ object NetworkModule {
             .baseUrl(RECIPES_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(MoshiConverterFactory.create())
+            .addCallAdapterFactory(CoroutinesResponseCallAdapterFactory())
             .build()
     }
 

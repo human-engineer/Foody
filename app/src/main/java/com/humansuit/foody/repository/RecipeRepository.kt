@@ -1,8 +1,9 @@
 package com.humansuit.foody.repository
 
-import android.util.Log
 import com.humansuit.foody.database.RecipeDao
 import com.humansuit.foody.network.RecipeApi
+import com.humansuit.foody.utils.Constants.OnExceptionLog
+import com.skydoves.sandwich.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -13,16 +14,37 @@ class RecipeRepository @Inject constructor(
     private val recipeDao: RecipeDao
 ) {
 
+    private val TAG = "RecipeRepository"
+
     suspend fun fetchRecipesByType(type: String) = flow {
         emit(recipeApi.fetchRecipes(type = type))
     }.flowOn(Dispatchers.IO)
 
 
-    suspend fun fetchPopularRecipes(number: Int) = flow {
-        val recipes = recipeDao.getRecipeList(0)
-        if (recipes.isEmpty())
-            Log.e("dfef", "fetchRecipesByType: EXCEPTION")
-        emit(recipeApi.fetchPopularRecipes(number = number))
+    suspend fun fetchPopularRecipes(
+        number: Int,
+        onSuccess: () -> Unit,
+        onError: () -> Unit
+    ) = flow {
+        val recipesListFromDb = recipeDao.getRecipeList()
+        if (recipesListFromDb.isEmpty()) {
+            OnExceptionLog(TAG, "Data from network")
+            recipeApi.fetchPopularRecipes(number)
+                .suspendOnSuccess {
+                    data?.let { response ->
+                        recipeDao.insertRecipeList(response.recipes)
+                        emit(response.recipes)
+                        onSuccess()
+                    }
+                }
+                .onError { onError() }
+                .onFailure { onError() }
+                .onException { onError() }
+        } else {
+            OnExceptionLog(TAG, "Data from database, size: ${recipesListFromDb.size}")
+            emit(recipesListFromDb)
+            onSuccess()
+        }
     }.flowOn(Dispatchers.IO)
 
 }

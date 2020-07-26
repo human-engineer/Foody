@@ -29,47 +29,39 @@ class LoungeViewModel @ViewModelInject constructor(
     val progressBarState = MutableLiveData<Boolean>()
 
 
-    fun fetchRecipesByType(type: String) = viewModelScope.launch {
-        recipeRepository.fetchRecipesByType(type = type)
-            .onStart { progressBarState.postValue(true) }
-            .catch { OnExceptionLog(TAG, "Exception -> ${it.message}") }
-            .collect { response ->
-                fetchRecipesList(response)
-                progressBarState.postValue(false)
-            }
-    }
-
-
     fun fetchPopularRecipes(number: Int) = viewModelScope.launch {
-        recipeRepository.fetchPopularRecipes(number = number)
+        recipeRepository.fetchPopularRecipes(
+            number = number,
+            onSuccess = { },
+            onError = { }
+        )
             .onStart { progressBarState.postValue(true) }
             .catch { OnExceptionLog(TAG, "Exception -> ${it.message}") }
-            .collect { response ->
-                fetchPopularRecipesList(response)
+            .collect { recipesList ->
+                OnSuccessLog(TAG, "Setup recipesList to recipesLiveData")
+                recipesListLiveData.postValue(recipesList)
                 progressBarState.postValue(false)
             }
     }
 
 
-    private fun fetchPopularRecipesList(response: Response<PopularRecipes>) {
-        if (response.isSuccessful) {
-            OnSuccessLog(TAG, "Response<List<Recipe>> -> Success")
-            response.body()?.let { recipes -> recipesListLiveData.postValue(recipes.recipes)}
-        }
+    fun fetchBreakfastRecipes(number: Int) = viewModelScope.launch {
+
     }
 
 
-    private fun fetchRecipesList(response: Response<RecipesWrapper>) {
-        if (response.isSuccessful) {
-            OnSuccessLog(TAG, "Response<RecipeWrapper> -> Success")
-            response.body()?.let { recipesWrapper -> recipesListLiveData.postValue(recipesWrapper.results) }
-        } else OnExceptionLog(TAG, "fetchRecipesList: Response -> Invalid")
+    fun fetchLanchRecipes(number: Int) = viewModelScope.launch {
+
     }
 
 
+    fun fetchCheapRecipes(number: Int) = viewModelScope.launch {
+
+    }
 
 
+    fun fetchHealthyRecipes(number: Int) = viewModelScope.launch {
 
-
+    }
 
 }
