@@ -1,22 +1,15 @@
 package com.humansuit.foody.ui.view
 
+import android.util.Log
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.humansuit.foody.model.PopularRecipes
+import androidx.lifecycle.*
 import com.humansuit.foody.model.Recipe
-import com.humansuit.foody.model.RecipesWrapper
 import com.humansuit.foody.repository.RecipeRepository
 import com.humansuit.foody.utils.Constants.OnExceptionLog
 import com.humansuit.foody.utils.Constants.OnSuccessLog
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import retrofit2.Response
 
 
 class LoungeViewModel @ViewModelInject constructor(
@@ -25,11 +18,28 @@ class LoungeViewModel @ViewModelInject constructor(
 ) : ViewModel() {
 
     private val TAG = "MainViewModel"
-    val recipesListLiveData = MutableLiveData<List<Recipe>>()
     val progressBarState = MutableLiveData<Boolean>()
+    val popularRecipes = MutableLiveData<List<Recipe>>()
+    val cheapRecipes = MutableLiveData<List<Recipe>>()
+    val globalRecipeList = MediatorLiveData<List<Recipe>>()
 
 
     fun fetchPopularRecipes(number: Int) = viewModelScope.launch {
+        val popularRecipesLiveData = recipeRepository.fetchPopularRecipes(
+            number = number,
+            onSuccess = { },
+            onError = { }
+        ).asLiveData()
+
+        globalRecipeList.addSource(popularRecipesLiveData) {
+            Log.e(TAG, "fetchPopularRecipes: Hereeee, size is ${it.size}")
+            globalRecipeList.value = it
+        }
+
+    }
+
+
+    fun fetchCheapRecipes(number: Int) = viewModelScope.launch {
         recipeRepository.fetchPopularRecipes(
             number = number,
             onSuccess = { },
@@ -39,10 +49,10 @@ class LoungeViewModel @ViewModelInject constructor(
             .catch { OnExceptionLog(TAG, "Exception -> ${it.message}") }
             .collect { recipesList ->
                 OnSuccessLog(TAG, "Setup recipesList to recipesLiveData")
-                recipesListLiveData.postValue(recipesList)
                 progressBarState.postValue(false)
             }
     }
+
 
 
     fun fetchBreakfastRecipes(number: Int) = viewModelScope.launch {
@@ -50,14 +60,10 @@ class LoungeViewModel @ViewModelInject constructor(
     }
 
 
-    fun fetchLanchRecipes(number: Int) = viewModelScope.launch {
+    fun fetchLunchRecipes(number: Int) = viewModelScope.launch {
 
     }
 
-
-    fun fetchCheapRecipes(number: Int) = viewModelScope.launch {
-
-    }
 
 
     fun fetchHealthyRecipes(number: Int) = viewModelScope.launch {

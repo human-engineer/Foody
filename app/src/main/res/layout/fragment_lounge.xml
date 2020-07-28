@@ -5,6 +5,7 @@
 
 
     <data>
+        <import type="kotlinx.coroutines.flow.Flow"/>
         <variable
             name="viewModel"
             type="com.humansuit.foody.ui.view.LoungeViewModel" />
@@ -16,7 +17,7 @@
 
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recipeSectionRecyclerView"
+            android:id="@+id/loungeRecipeList"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -36,7 +37,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/recipeSectionRecyclerView" />
+            app:layout_constraintTop_toTopOf="@+id/loungeRecipeList" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

@@ -13,7 +13,7 @@ class RecipeSectionAdapter(private val viewModel: LoungeViewModel)
     : RecyclerView.Adapter<RecipeSectionAdapter.ViewHolder>() {
 
 
-    private lateinit var items: List<Recipe>
+    private var items: List<Recipe>? = null
 
     inner class ViewHolder(val binding: RecipeItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -21,9 +21,10 @@ class RecipeSectionAdapter(private val viewModel: LoungeViewModel)
             binding.apply {
                 recipeNameText.text = item.title
                 Glide.with(binding.root.context)
-                    .asBitmap()
+                    .asDrawable()
                     .load(item.image)
                     .centerInside()
+                    .skipMemoryCache(true)
                     //.apply(RequestOptions().transform(RoundedCorners(30)))
                     .into(binding.recipeImage)
             }
@@ -36,10 +37,10 @@ class RecipeSectionAdapter(private val viewModel: LoungeViewModel)
         return ViewHolder(binding)
     }
 
-    override fun getItemCount(): Int = items.size
+    override fun getItemCount(): Int = items?.size ?: 0
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(items[position])
+        items?.get(position)?.let { holder.bind(it) }
     }
 
 

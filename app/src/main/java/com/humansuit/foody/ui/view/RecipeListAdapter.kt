@@ -1,25 +1,25 @@
 package com.humansuit.foody.ui.view
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
+import com.humansuit.foody.binding.bindAdapter
 import com.humansuit.foody.databinding.RecipeSectionBinding
-import com.humansuit.foody.model.Recipe
+import com.humansuit.foody.model.RecipeSection
+import com.humansuit.foody.utils.RecipeSectionType
 
 
-class RecipeListAdapter(private val mViewModel: LoungeViewModel)
+class RecipeListAdapter(private val viewModel: LoungeViewModel)
     : RecyclerView.Adapter<RecipeListAdapter.ViewHolder>() {
 
-    private lateinit var items: List<Recipe>
+    private var sectionList: Map<RecipeSectionType, RecipeSection>? = null
 
     inner class ViewHolder(val binding: RecipeSectionBinding)
         : RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
-            binding.apply {
-                val adapter = RecipeSectionAdapter(mViewModel)
-                adapter.setupList(items)
-                recipeRecyclerView.adapter = adapter
-            }
+        fun bind(section: RecipeSectionType) {
+
         }
     }
 
@@ -29,16 +29,14 @@ class RecipeListAdapter(private val mViewModel: LoungeViewModel)
         return ViewHolder(binding)
     }
 
-    override fun getItemCount(): Int = 20
-
+    override fun getItemCount(): Int = sectionList?.size ?: 0
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind()
+        holder.bind(RecipeSectionType.values()[position])
     }
 
-
-    fun setupList(recipes: List<Recipe>) {
-        items = recipes
+    fun setupSectionList(recipeSectionList: Map<RecipeSectionType, RecipeSection>?) {
+        sectionList = recipeSectionList
     }
 
 }
