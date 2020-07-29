@@ -1,6 +1,6 @@
 package com.humansuit.foody.network
 
-import com.humansuit.foody.model.PopularRecipes
+import com.humansuit.foody.model.PopularRecipesResponse
 import com.humansuit.foody.model.RecipesWrapper
 import com.humansuit.foody.utils.Constants.API_KEY
 import com.skydoves.sandwich.ApiResponse
@@ -18,6 +18,6 @@ interface RecipeService {
     @GET("random?apiKey=$API_KEY")
     suspend fun getPopularRecipes(
         @Query("number") number: Int
-    ) : ApiResponse<PopularRecipes>
+    ) : ApiResponse<PopularRecipesResponse>
 
 }

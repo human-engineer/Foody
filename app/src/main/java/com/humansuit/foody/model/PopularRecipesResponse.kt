@@ -1,5 +1,5 @@
 package com.humansuit.foody.model
 
-data class PopularRecipes(
+data class PopularRecipesResponse(
     val recipes: List<Recipe>
 )

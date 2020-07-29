@@ -17,7 +17,21 @@ class RecipeRepository @Inject constructor(
     private val TAG = "RecipeRepository"
 
     suspend fun fetchRecipesByType(type: String) = flow {
-        emit(recipeApi.fetchRecipes(type = type))
+        val recipesListFromDb = recipeDao.getRecipeListByType(0, type)
+        if (recipesListFromDb.isEmpty()) {
+            OnExceptionLog(TAG, "Recipes by type fetching...")
+            recipeApi.fetchRecipesByType(type)
+                .suspendOnSuccess {
+                    data?.let { response ->
+                        response.results.forEach { it.recipeType = type }
+                        recipeDao.insertRecipeList(response.results)
+                        emit(response.results)
+                    }
+                }
+        } else {
+            OnExceptionLog(TAG, "Data from database, size: ${recipesListFromDb.size}")
+            emit(recipesListFromDb)
+        }
     }.flowOn(Dispatchers.IO)
 
 
@@ -26,12 +40,13 @@ class RecipeRepository @Inject constructor(
         onSuccess: () -> Unit,
         onError: () -> Unit
     ) = flow {
-        val recipesListFromDb = recipeDao.getRecipeList()
+        val recipesListFromDb = recipeDao.getPopularRecipeList()
         if (recipesListFromDb.isEmpty()) {
-            OnExceptionLog(TAG, "Data from network")
+            OnExceptionLog(TAG, "Popular recipes fetching...")
             recipeApi.fetchPopularRecipes(number)
                 .suspendOnSuccess {
                     data?.let { response ->
+                        response.recipes.forEach { it.recipeType = "popular" }
                         recipeDao.insertRecipeList(response.recipes)
                         emit(response.recipes)
                         onSuccess()

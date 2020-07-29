@@ -6,10 +6,11 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.humansuit.foody.model.Recipe
 import com.humansuit.foody.repository.RecipeRepository
-import com.humansuit.foody.utils.Constants.OnExceptionLog
-import com.humansuit.foody.utils.Constants.OnSuccessLog
+import com.humansuit.foody.utils.MergedRecipes
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class LoungeViewModel @ViewModelInject constructor(
@@ -19,55 +20,42 @@ class LoungeViewModel @ViewModelInject constructor(
 
     private val TAG = "MainViewModel"
     val progressBarState = MutableLiveData<Boolean>()
-    val popularRecipes = MutableLiveData<List<Recipe>>()
-    val cheapRecipes = MutableLiveData<List<Recipe>>()
-    val globalRecipeList = MediatorLiveData<List<Recipe>>()
+    private val popularRecipesLiveData = MutableLiveData<List<Recipe>>()
+    private val cheapRecipesLiveData = MutableLiveData<List<Recipe>>()
+    val globalRecipeList = MediatorLiveData<MergedRecipes>()
 
 
-    fun fetchPopularRecipes(number: Int) = viewModelScope.launch {
-        val popularRecipesLiveData = recipeRepository.fetchPopularRecipes(
-            number = number,
-            onSuccess = { },
-            onError = { }
-        ).asLiveData()
+    fun fetchStartData(number: Int = 10) = viewModelScope.launch {
+        Log.e(TAG, "fetchPopularRecipes: Starting collect data")
 
-        globalRecipeList.addSource(popularRecipesLiveData) {
-            Log.e(TAG, "fetchPopularRecipes: Hereeee, size is ${it.size}")
-            globalRecipeList.value = it
+        combine(getPopularRecipesFlow(number), getTypedRecipeFlow()) {
+                popularRecipes,
+                cheapRecipes ->
+            popularRecipesLiveData.postValue(popularRecipes)
+            cheapRecipesLiveData.postValue(cheapRecipes)
         }
-
+            .onStart { progressBarState.value = true }
+            .collect {
+            globalRecipeList.apply {
+                addSource(popularRecipesLiveData) { globalRecipeList.value = MergedRecipes.PopularRecipes(it) }
+                addSource(cheapRecipesLiveData) { globalRecipeList.value = MergedRecipes.TypedRecipes(it) }
+                progressBarState.postValue(false)
+            }
+        }
     }
 
 
-    fun fetchCheapRecipes(number: Int) = viewModelScope.launch {
+    private suspend fun getPopularRecipesFlow(number: Int) = withContext(Dispatchers.IO) {
         recipeRepository.fetchPopularRecipes(
             number = number,
             onSuccess = { },
             onError = { }
         )
-            .onStart { progressBarState.postValue(true) }
-            .catch { OnExceptionLog(TAG, "Exception -> ${it.message}") }
-            .collect { recipesList ->
-                OnSuccessLog(TAG, "Setup recipesList to recipesLiveData")
-                progressBarState.postValue(false)
-            }
     }
 
 
-
-    fun fetchBreakfastRecipes(number: Int) = viewModelScope.launch {
-
-    }
-
-
-    fun fetchLunchRecipes(number: Int) = viewModelScope.launch {
-
-    }
-
-
-
-    fun fetchHealthyRecipes(number: Int) = viewModelScope.launch {
-
+    private suspend fun getTypedRecipeFlow(type: String = "breakfast") = withContext(Dispatchers.IO) {
+        recipeRepository.fetchRecipesByType(type)
     }
 
 }

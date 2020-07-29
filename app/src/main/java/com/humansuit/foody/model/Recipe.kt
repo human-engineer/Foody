@@ -8,5 +8,6 @@ data class Recipe(
     @PrimaryKey val id : Int,
     val title : String,
     val image : String,
-    val imageType : String
+    val imageType : String,
+    var recipeType : String?
 )
