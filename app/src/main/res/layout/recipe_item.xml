@@ -11,7 +11,7 @@
             type="com.humansuit.foody.model.Recipe" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
@@ -23,11 +23,7 @@
             android:layout_marginEnd="4dp"
             android:layout_marginBottom="8dp"
             app:cardCornerRadius="8dp"
-            app:cardElevation="4dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -53,9 +49,9 @@
                     android:maxLines="2"
                     android:text="@{ recipe.title }"
                     android:textAlignment="viewStart"
-                    android:textSize="15sp" />
+                    android:textSize="14sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
 </layout>

@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.humansuit.foody.databinding.RecipeItemBinding
 import com.humansuit.foody.model.Recipe
-import com.humansuit.foody.ui.view.LoungeViewModel
 import com.humansuit.foody.utils.CustomViewHolder
 
 
@@ -31,16 +30,17 @@ class RecipeListAdapter : ListAdapter<Recipe, CustomViewHolder>(Companion) {
 
     override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
         val currentRecipe = getItem(position)
-        val itemBinding = holder.binding as RecipeItemBinding
+        val recipeBinding = holder.binding as RecipeItemBinding
 
-        itemBinding.recipe = currentRecipe
-        itemBinding.root.setOnClickListener {
+        recipeBinding.recipe = currentRecipe
+        recipeBinding.root.setOnClickListener {
             Toast.makeText(
-                itemBinding.root.context,
+                recipeBinding.root.context,
                 currentRecipe.title,
                 Toast.LENGTH_SHORT
             ).show() }
-        itemBinding.executePendingBindings()
+
+        recipeBinding.executePendingBindings()
     }
 
 }

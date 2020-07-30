@@ -1,7 +1,6 @@
 package com.humansuit.foody.ui.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +11,9 @@ import com.humansuit.foody.databinding.FragmentLoungeBinding
 import com.humansuit.foody.model.RecipeSection
 import com.humansuit.foody.ui.adapter.RecipeSectionAdapter
 import com.humansuit.foody.utils.MergedRecipes
+import com.humansuit.foody.utils.RecipeSectionType
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.*
 
 
 @AndroidEntryPoint
@@ -21,6 +22,9 @@ class LoungeFragment : Fragment() {
     private val TAG = "MainFragment"
     private lateinit var binding: FragmentLoungeBinding
     private val viewModel by viewModels<LoungeViewModel>()
+    private var bool = true
+    private var previousTotal = 0
+    private var visibleThreshold = 5
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,7 +41,8 @@ class LoungeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val recipeSectionList = arrayListOf<RecipeSection>()
-        val recipeSectionAdapter = RecipeSectionAdapter()
+        val recipeSectionAdapter = RecipeSectionAdapter(viewModel)
+
         viewModel.fetchStartData()
 
         binding.apply {
@@ -49,31 +54,37 @@ class LoungeFragment : Fragment() {
         viewModel.globalRecipeList.observe(viewLifecycleOwner) { mergedRecipes ->
             when(mergedRecipes) {
                 is MergedRecipes.PopularRecipes -> {
-                    Log.e(TAG, "onViewCreated: ${mergedRecipes.popularRecipes.first().title}")
                     val popularRecipeSection = RecipeSection(
                         0,
                         "Popular recipes",
-                        mergedRecipes.popularRecipes)
+                        mergedRecipes.popularRecipes,
+                        RecipeSectionType.POPULAR_RECIPE
+                    )
 
-                    recipeSectionList.add(popularRecipeSection)
-                    recipeSectionList.add(popularRecipeSection)
-                    recipeSectionList.add(popularRecipeSection)
-                    recipeSectionList.add(popularRecipeSection)
-                    recipeSectionAdapter.submitList(recipeSectionList)
+                    if (recipeSectionAdapter.itemCount > 0) {
+                            recipeSectionList.add(popularRecipeSection)
+                            recipeSectionAdapter.notifyItemInserted(recipeSectionList.size)
+                    } else {
+                        recipeSectionList.add(popularRecipeSection)
+                        recipeSectionAdapter.submitList(recipeSectionList)
+                    }
                 }
-                is MergedRecipes.TypedRecipes -> {
-                    Log.e(TAG, "onViewCreated: ${mergedRecipes.cheapRecipes.first().title}")
+                is MergedRecipes.BreakfastRecipes -> {
                     val breakfastRecipeSection = RecipeSection(
                         1,
                         "Breakfast recipes",
-                        mergedRecipes.cheapRecipes)
+                        mergedRecipes.breakfastRecipes,
+                        RecipeSectionType.BREAKFAST_RECIPE
+                    )
 
-                    recipeSectionList.add(breakfastRecipeSection)
-                    recipeSectionList.add(breakfastRecipeSection)
-                    recipeSectionList.add(breakfastRecipeSection)
-                    recipeSectionList.add(breakfastRecipeSection)
-                    recipeSectionAdapter.submitList(recipeSectionList)
+
+                    GlobalScope.launch(Dispatchers.Main) {
+                        delay(500)
+                        recipeSectionList.add(breakfastRecipeSection)
+                        recipeSectionAdapter.notifyItemInserted(recipeSectionAdapter.itemCount)
+                    }
                 }
+
             }
         }
     }
