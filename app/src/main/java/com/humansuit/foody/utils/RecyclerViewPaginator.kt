@@ -14,8 +14,9 @@ abstract class RecyclerViewPaginator(private val layoutManager: LinearLayoutMana
         val totalItemCount = layoutManager.itemCount
         val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
 
+
         if (!isLoading() && !isLastPage()) {
-            if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0) {
+            if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0 && !recyclerView.canScrollHorizontally(1)) {
                 loadMoreItems()
                 Log.e("RecyclerView paginator", "onScrolled: Loading more items...")
             }

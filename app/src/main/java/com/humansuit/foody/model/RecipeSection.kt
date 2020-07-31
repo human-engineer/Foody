@@ -5,6 +5,6 @@ import com.humansuit.foody.utils.RecipeSectionType
 data class RecipeSection(
     val id: Int,
     val title: String,
-    val recipes: List<Recipe>,
+    var recipes: ArrayList<Recipe>,
     val recipeSectionType: RecipeSectionType
 )

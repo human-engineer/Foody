@@ -5,7 +5,6 @@ import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.humansuit.foody.model.Recipe
-import com.humansuit.foody.model.RecipeSection
 import com.humansuit.foody.repository.RecipeRepository
 import com.humansuit.foody.utils.MergedRecipes
 import com.humansuit.foody.utils.RecipeSectionType
@@ -24,7 +23,7 @@ class LoungeViewModel @ViewModelInject constructor(
     val progressBarState = MutableLiveData<Boolean>()
     private val popularRecipesLiveData = MutableLiveData<List<Recipe>>()
     private val cheapRecipesLiveData = MutableLiveData<List<Recipe>>()
-    val globalRecipeList = MediatorLiveData<MergedRecipes>()
+    val initRecipeList = MediatorLiveData<MergedRecipes>()
     var isDataLoading = false
     var isLastPage = false
     var currentPage = 1
@@ -41,9 +40,9 @@ class LoungeViewModel @ViewModelInject constructor(
         }
             .onStart { progressBarState.value = true }
             .collect {
-            globalRecipeList.apply {
-                addSource(popularRecipesLiveData) { globalRecipeList.value = MergedRecipes.PopularRecipes(it) }
-                addSource(cheapRecipesLiveData) { globalRecipeList.value = MergedRecipes.BreakfastRecipes(it) }
+            initRecipeList.apply {
+                addSource(popularRecipesLiveData) { initRecipeList.value = MergedRecipes.PopularRecipes(it) }
+                addSource(cheapRecipesLiveData) { initRecipeList.value = MergedRecipes.BreakfastRecipes(it) }
                 progressBarState.postValue(false)
             }
         }

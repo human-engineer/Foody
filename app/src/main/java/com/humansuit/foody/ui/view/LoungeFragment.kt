@@ -1,6 +1,7 @@
 package com.humansuit.foody.ui.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
 import com.humansuit.foody.databinding.FragmentLoungeBinding
+import com.humansuit.foody.model.Recipe
 import com.humansuit.foody.model.RecipeSection
 import com.humansuit.foody.ui.adapter.RecipeSectionAdapter
 import com.humansuit.foody.utils.MergedRecipes
@@ -51,13 +53,14 @@ class LoungeFragment : Fragment() {
         }
 
 
-        viewModel.globalRecipeList.observe(viewLifecycleOwner) { mergedRecipes ->
+        viewModel.initRecipeList.observe(viewLifecycleOwner) { mergedRecipes ->
+            Log.e(TAG, "onViewCreated: observes")
             when(mergedRecipes) {
                 is MergedRecipes.PopularRecipes -> {
                     val popularRecipeSection = RecipeSection(
                         0,
                         "Popular recipes",
-                        mergedRecipes.popularRecipes,
+                        mergedRecipes.popularRecipes as ArrayList<Recipe>,
                         RecipeSectionType.POPULAR_RECIPE
                     )
 
@@ -73,7 +76,7 @@ class LoungeFragment : Fragment() {
                     val breakfastRecipeSection = RecipeSection(
                         1,
                         "Breakfast recipes",
-                        mergedRecipes.breakfastRecipes,
+                        mergedRecipes.breakfastRecipes as ArrayList<Recipe>,
                         RecipeSectionType.BREAKFAST_RECIPE
                     )
 
@@ -83,8 +86,9 @@ class LoungeFragment : Fragment() {
                         recipeSectionList.add(breakfastRecipeSection)
                         recipeSectionAdapter.notifyItemInserted(recipeSectionAdapter.itemCount)
                     }
-                }
 
+                    viewModel.initRecipeList.removeObservers(viewLifecycleOwner)
+                }
             }
         }
     }
