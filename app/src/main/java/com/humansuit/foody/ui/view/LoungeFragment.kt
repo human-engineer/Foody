@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
@@ -60,7 +61,7 @@ class LoungeFragment : Fragment() {
                     val popularRecipeSection = RecipeSection(
                         0,
                         "Popular recipes",
-                        mergedRecipes.popularRecipes as ArrayList<Recipe>,
+                        mergedRecipes.popularRecipes.getContentIfNotHandled() as ArrayList<Recipe>,
                         RecipeSectionType.POPULAR_RECIPE
                     )
 
@@ -71,12 +72,14 @@ class LoungeFragment : Fragment() {
                         recipeSectionList.add(popularRecipeSection)
                         recipeSectionAdapter.submitList(recipeSectionList)
                     }
+
+                    viewModel.popularRecipesLiveData.removeObservers(viewLifecycleOwner)
                 }
                 is MergedRecipes.BreakfastRecipes -> {
                     val breakfastRecipeSection = RecipeSection(
                         1,
                         "Breakfast recipes",
-                        mergedRecipes.breakfastRecipes as ArrayList<Recipe>,
+                        mergedRecipes.breakfastRecipes.getContentIfNotHandled() as ArrayList<Recipe>,
                         RecipeSectionType.BREAKFAST_RECIPE
                     )
 
@@ -87,7 +90,26 @@ class LoungeFragment : Fragment() {
                         recipeSectionAdapter.notifyItemInserted(recipeSectionAdapter.itemCount)
                     }
 
+                    viewModel.cheapRecipesLiveData.removeObservers(viewLifecycleOwner)
                     viewModel.initRecipeList.removeObservers(viewLifecycleOwner)
+                }
+            }
+        }
+
+
+        viewModel.paginationLivaData.observe(viewLifecycleOwner) { mergedRecipes ->
+            when(mergedRecipes) {
+                is MergedRecipes.PopularRecipes -> {
+                    mergedRecipes.popularRecipes.getContentIfNotHandled()?.let { recipeList ->
+                        Log.e(TAG, "onViewCreated: list size is ${recipeList.size}")
+                        recipeSectionAdapter.addMoreRecipes(
+                            recipeList,
+                            RecipeSectionType.POPULAR_RECIPE
+                        )
+                    }
+                }
+                is MergedRecipes.BreakfastRecipes -> {
+
                 }
             }
         }

@@ -62,4 +62,17 @@ class RecipeRepository @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
+
+
+    suspend fun fetchPopularRecipesFromApi(number: Int) = flow {
+        recipeApi.fetchPopularRecipes(number)
+            .suspendOnSuccess {
+                data?.let { response ->
+                    response.recipes.forEach { it.recipeType = "popular" }
+                    recipeDao.insertRecipeList(response.recipes)
+                    emit(response.recipes)
+                }
+            }
+    }.flowOn(Dispatchers.IO)
+
 }

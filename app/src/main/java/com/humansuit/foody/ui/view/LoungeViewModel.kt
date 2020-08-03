@@ -6,6 +6,7 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.humansuit.foody.model.Recipe
 import com.humansuit.foody.repository.RecipeRepository
+import com.humansuit.foody.utils.Event
 import com.humansuit.foody.utils.MergedRecipes
 import com.humansuit.foody.utils.RecipeSectionType
 import kotlinx.coroutines.Dispatchers
@@ -21,8 +22,10 @@ class LoungeViewModel @ViewModelInject constructor(
 
     private val TAG = "MainViewModel"
     val progressBarState = MutableLiveData<Boolean>()
-    private val popularRecipesLiveData = MutableLiveData<List<Recipe>>()
-    private val cheapRecipesLiveData = MutableLiveData<List<Recipe>>()
+    val popularRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
+    val cheapRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
+
+    val paginationLivaData = MediatorLiveData<MergedRecipes>()
     val initRecipeList = MediatorLiveData<MergedRecipes>()
     var isDataLoading = false
     var isLastPage = false
@@ -35,8 +38,8 @@ class LoungeViewModel @ViewModelInject constructor(
         combine(getPopularRecipesFlow(number), getTypedRecipeFlow()) {
                 popularRecipes,
                 cheapRecipes ->
-            popularRecipesLiveData.postValue(popularRecipes)
-            cheapRecipesLiveData.postValue(cheapRecipes)
+            popularRecipesLiveData.postValue(Event(popularRecipes))
+            cheapRecipesLiveData.postValue(Event(cheapRecipes))
         }
             .onStart { progressBarState.value = true }
             .collect {
@@ -51,12 +54,20 @@ class LoungeViewModel @ViewModelInject constructor(
 
     private fun fetchMorePopularRecipes(number: Int = 10) = viewModelScope.launch {
         Log.e(TAG, "fetchPopularRecipes: Collect more data")
-        getPopularRecipesFlow(number)
+        getPopularRecipesFromApi(number)
             .onStart { progressBarState.value = true }
-            .collect {
-                popularRecipesLiveData.postValue(it)
+            .collect { recipes ->
+                popularRecipesLiveData.postValue(Event(recipes))
+                paginationLivaData.addSource(popularRecipesLiveData) {
+                    paginationLivaData.value = MergedRecipes.PopularRecipes(it)
+                }
                 progressBarState.postValue(false)
             }
+    }
+
+
+    private suspend fun getPopularRecipesFromApi(number: Int) = withContext(Dispatchers.IO) {
+        recipeRepository.fetchPopularRecipesFromApi(number)
     }
 
 
