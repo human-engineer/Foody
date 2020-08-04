@@ -79,10 +79,11 @@ class LoungeFragment : Fragment() {
                             recipeSectionList.add(recipeSection)
                             recipeSectionAdapter.submitList(recipeSectionList)
                         }
-                        viewModel.initialListLiveData.removeObservers(viewLifecycleOwner)
                     }
                 }
             }
+            if (data.hasBeenHandled && recipeSectionList.size >= 2)
+                viewModel.initialListLiveData.removeObservers(viewLifecycleOwner)
         }
 
 
