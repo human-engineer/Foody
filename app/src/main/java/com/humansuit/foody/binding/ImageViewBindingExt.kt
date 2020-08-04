@@ -6,7 +6,6 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.humansuit.foody.R
 
 @BindingAdapter("withImage")
@@ -15,8 +14,7 @@ fun ImageView.loadImage(imageUrl: String?) {
         .load(imageUrl)
         .placeholder(R.drawable.ic_recipe_placeholder_temp)
         .error(R.drawable.ic_recipe_placeholder_temp)
-        .diskCacheStrategy(DiskCacheStrategy.NONE)
-        .centerCrop()
+        .fitCenter()
         .into(this)
 }
 

@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.Exception
 
 
 class LoungeViewModel @ViewModelInject constructor(
@@ -22,30 +23,29 @@ class LoungeViewModel @ViewModelInject constructor(
 
     private val TAG = "MainViewModel"
     val progressBarState = MutableLiveData<Boolean>()
-    val popularRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
-    val cheapRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
+    private val popularRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
+    private val breakfastRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
 
     val paginationLivaData = MediatorLiveData<MergedRecipes>()
     val initRecipeList = MediatorLiveData<MergedRecipes>()
     var isDataLoading = false
     var isLastPage = false
     var currentPage = 1
+    var breakfastRecipesPage = 1
 
 
     fun fetchStartData(number: Int = 10) = viewModelScope.launch {
-        Log.e(TAG, "fetchPopularRecipes: Starting collect data")
-
-        combine(getPopularRecipesFlow(number), getTypedRecipeFlow()) {
+        combine(getPopularRecipesFlow(number), getBreakfastRecipeFlow()) {
                 popularRecipes,
-                cheapRecipes ->
+                breakfastRecipes ->
             popularRecipesLiveData.postValue(Event(popularRecipes))
-            cheapRecipesLiveData.postValue(Event(cheapRecipes))
+            breakfastRecipesLiveData.postValue(Event(breakfastRecipes))
         }
             .onStart { progressBarState.value = true }
             .collect {
             initRecipeList.apply {
                 addSource(popularRecipesLiveData) { initRecipeList.value = MergedRecipes.PopularRecipes(it) }
-                addSource(cheapRecipesLiveData) { initRecipeList.value = MergedRecipes.BreakfastRecipes(it) }
+                addSource(breakfastRecipesLiveData) { initRecipeList.value = MergedRecipes.BreakfastRecipes(it) }
                 progressBarState.postValue(false)
             }
         }
@@ -53,21 +53,33 @@ class LoungeViewModel @ViewModelInject constructor(
 
 
     private fun fetchMorePopularRecipes(number: Int = 10) = viewModelScope.launch {
-        Log.e(TAG, "fetchPopularRecipes: Collect more data")
         getPopularRecipesFromApi(number)
             .onStart { progressBarState.value = true }
             .collect { recipes ->
                 popularRecipesLiveData.postValue(Event(recipes))
-                paginationLivaData.addSource(popularRecipesLiveData) {
-                    paginationLivaData.value = MergedRecipes.PopularRecipes(it)
-                }
+                try {
+                    paginationLivaData.addSource(popularRecipesLiveData) {
+                        paginationLivaData.value = MergedRecipes.PopularRecipes(it)
+                    }
+                } catch (e: Exception) {}
                 progressBarState.postValue(false)
             }
     }
 
 
-    private suspend fun getPopularRecipesFromApi(number: Int) = withContext(Dispatchers.IO) {
-        recipeRepository.fetchPopularRecipesFromApi(number)
+    private fun fetchMoreBreakfastRecipes() = viewModelScope.launch {
+        getBreakfastRecipesFromApi("breakfast", breakfastRecipesPage)
+            .onStart { progressBarState.value = true }
+            .collect { recipes ->
+                breakfastRecipesLiveData.postValue(Event(recipes))
+                try {
+                    paginationLivaData.addSource(breakfastRecipesLiveData) {
+                        paginationLivaData.value = MergedRecipes.BreakfastRecipes(it)
+                    }
+                } catch (e: Exception) { }
+                breakfastRecipesPage++
+                progressBarState.postValue(false)
+            }
     }
 
 
@@ -80,21 +92,33 @@ class LoungeViewModel @ViewModelInject constructor(
     }
 
 
-    private suspend fun getTypedRecipeFlow(type: String = "breakfast") = withContext(Dispatchers.IO) {
+    private suspend fun getBreakfastRecipeFlow(type: String = "breakfast") = withContext(Dispatchers.IO) {
         recipeRepository.fetchRecipesByType(type)
+    }
+
+
+    private suspend fun getPopularRecipesFromApi(number: Int) = withContext(Dispatchers.IO) {
+        recipeRepository.fetchPopularRecipesFromApi(number)
+    }
+
+
+    private suspend fun getBreakfastRecipesFromApi(type: String = "breakfast", page: Int = 0) = withContext(Dispatchers.IO) {
+        recipeRepository.fetchBreakfastRecipesFromApi(type, page)
     }
 
 
 
     fun loadNextRecipePage(sectionType: RecipeSectionType) {
+        isDataLoading = false
         when(sectionType) {
             RecipeSectionType.POPULAR_RECIPE -> {
                 fetchMorePopularRecipes()
             }
             RecipeSectionType.BREAKFAST_RECIPE -> {
-                Log.e(TAG, "loadNextRecipePage: Breakfast recipe fetching..")
+                fetchMoreBreakfastRecipes()
             }
         }
+
     }
 
 }

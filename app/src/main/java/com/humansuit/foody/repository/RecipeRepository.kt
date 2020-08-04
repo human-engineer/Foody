@@ -12,7 +12,7 @@ import javax.inject.Inject
 class RecipeRepository @Inject constructor(
     private val recipeApi: RecipeApi,
     private val recipeDao: RecipeDao
-) {
+) : Repository {
 
     private val TAG = "RecipeRepository"
 
@@ -20,7 +20,7 @@ class RecipeRepository @Inject constructor(
         val recipesListFromDb = recipeDao.getRecipeListByType(0, type)
         if (recipesListFromDb.isEmpty()) {
             OnExceptionLog(TAG, "Recipes by type fetching...")
-            recipeApi.fetchRecipesByType(type)
+            recipeApi.fetchRecipesByType(type, 0)
                 .suspendOnSuccess {
                     data?.let { response ->
                         response.results.forEach { it.recipeType = type }
@@ -63,7 +63,6 @@ class RecipeRepository @Inject constructor(
     }.flowOn(Dispatchers.IO)
 
 
-
     suspend fun fetchPopularRecipesFromApi(number: Int) = flow {
         recipeApi.fetchPopularRecipes(number)
             .suspendOnSuccess {
@@ -71,6 +70,18 @@ class RecipeRepository @Inject constructor(
                     response.recipes.forEach { it.recipeType = "popular" }
                     recipeDao.insertRecipeList(response.recipes)
                     emit(response.recipes)
+                }
+            }
+    }.flowOn(Dispatchers.IO)
+
+
+    suspend fun fetchBreakfastRecipesFromApi(type: String, page: Int) = flow {
+        recipeApi.fetchRecipesByType(type, page = page * 10)
+            .suspendOnSuccess {
+                data?.let { response ->
+                    response.results.forEach { it.recipeType = type }
+                    recipeDao.insertRecipeList(response.results)
+                    emit(response.results)
                 }
             }
     }.flowOn(Dispatchers.IO)

@@ -1,9 +1,7 @@
 package com.humansuit.foody.ui.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.view.get
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,18 +15,16 @@ import com.humansuit.foody.utils.CustomViewHolder
 import com.humansuit.foody.utils.RecipeSectionType
 import com.humansuit.foody.utils.RecyclerViewPaginator
 
-class RecipeSectionAdapter(private val viewModel: LoungeViewModel) : ListAdapter<RecipeSection, CustomViewHolder>(Companion) {
+class RecipeSectionAdapter(private val viewModel: LoungeViewModel)
+    : ListAdapter<RecipeSection, CustomViewHolder>(Companion) {
 
     private val viewPool = RecyclerView.RecycledViewPool()
-    private val binding: RecipeSectionBinding? = null
-    private val bindings: Map<RecipeSectionType, ViewDataBinding>? = null
-
+    private val viewHolderBindings = mutableMapOf<RecipeSectionType, ViewDataBinding>()
 
     companion object : DiffUtil.ItemCallback<RecipeSection>() {
         override fun areItemsTheSame(oldItem: RecipeSection, newItem: RecipeSection): Boolean {
             return  oldItem === newItem
         }
-
         override fun areContentsTheSame(oldItem: RecipeSection, newItem: RecipeSection): Boolean {
             return  oldItem.id == newItem.id
         }
@@ -37,21 +33,19 @@ class RecipeSectionAdapter(private val viewModel: LoungeViewModel) : ListAdapter
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        binding = RecipeSectionBinding.inflate(inflater, parent, false)
+        val binding = RecipeSectionBinding.inflate(inflater, parent, false)
 
         return CustomViewHolder(binding)
     }
 
 
     override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
-        Log.e("TAG", "onBindViewHolder: ViewHolder binded")
         val currentRecipeSection = getItem(position)
         val binding = holder.binding as RecipeSectionBinding
         val layoutManager = binding.recipeRecyclerView.layoutManager
         val scrollListener = getRecyclerViewOnScrollListener(
             layoutManager = layoutManager as LinearLayoutManager,
-            sectionType = currentRecipeSection.recipeSectionType,
-            recyclerView = binding.recipeRecyclerView
+            sectionType = currentRecipeSection.recipeSectionType
         )
 
         binding.apply {
@@ -60,54 +54,39 @@ class RecipeSectionAdapter(private val viewModel: LoungeViewModel) : ListAdapter
             recipeRecyclerView.setItemViewCacheSize(20)
             recipeRecyclerView.setRecycledViewPool(viewPool)
             recipeRecyclerView.addOnScrollListener(scrollListener)
+            viewHolderBindings[currentRecipeSection.recipeSectionType] = this
             executePendingBindings()
         }
     }
 
 
     fun addMoreRecipes(recipeList: List<Recipe>, sectionType: RecipeSectionType) {
-//        currentList.forEach { recipeSection ->
-//            if (recipeSection.recipeSectionType == sectionType) {
-//                recipeSection.recipes.addAll(recipeList)
-//                notifyItemRangeInserted(lastIndex, recipeList.size)
-//                return@forEach
-//            }
-//        }
-
-        Log.e("SectionAdapter", "addMoreRecipes: Add more items to list")
-//        for ((index, recipeSection) in currentList.withIndex()) {
-//            if (recipeSection.recipeSectionType == sectionType) {
-//                val currentListSize = currentList[index].recipes.size
-//                currentList[index].recipes.addAll(recipeList)
-//                notifyItemRangeInserted(currentListSize, recipeList.size)
-//                return
-//            }
-//        }
-
-        val adapter = binding.recipeRecyclerView.adapter as RecipeListAdapter
-        Log.e("FFFFFFFFFFF", "addMoreRecipes: ${adapter.currentList[1].recipeType}")
-
-
-
+        currentList.forEach { recipeSection ->
+            if (recipeSection.recipeSectionType == sectionType) {
+                val sectionBinding = viewHolderBindings[recipeSection.recipeSectionType] as RecipeSectionBinding
+                val adapter = sectionBinding.recipeRecyclerView.adapter as RecipeListAdapter
+                val lastPosition = recipeSection.recipes.size
+                recipeSection.recipes.addAll(recipeList)
+                adapter.notifyItemRangeInserted(lastPosition, recipeList.size)
+                return@forEach
+            }
+        }
     }
 
 
     private fun getRecyclerViewOnScrollListener(
         layoutManager: LinearLayoutManager,
-        sectionType: RecipeSectionType,
-        recyclerView: RecyclerView
+        sectionType: RecipeSectionType
     ) = object : RecyclerViewPaginator(layoutManager) {
         override fun loadMoreItems() {
             viewModel.isDataLoading = true
             viewModel.currentPage += 1
-            addMoreRecipes(emptyList(), RecipeSectionType.POPULAR_RECIPE)
-            //viewModel.loadNextRecipePage(sectionType)
+            viewModel.loadNextRecipePage(sectionType)
         }
 
         override fun isLastPage() = viewModel.isLastPage
 
         override fun isLoading() = viewModel.isDataLoading
-
     }
 
 

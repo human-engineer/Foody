@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
@@ -16,7 +15,6 @@ import com.humansuit.foody.ui.adapter.RecipeSectionAdapter
 import com.humansuit.foody.utils.MergedRecipes
 import com.humansuit.foody.utils.RecipeSectionType
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
 
 
 @AndroidEntryPoint
@@ -46,16 +44,13 @@ class LoungeFragment : Fragment() {
         val recipeSectionList = arrayListOf<RecipeSection>()
         val recipeSectionAdapter = RecipeSectionAdapter(viewModel)
 
-        viewModel.fetchStartData()
-
         binding.apply {
-            viewModel = this@LoungeFragment.viewModel
+            viewModel = this@LoungeFragment.viewModel.apply { fetchStartData() }
             loungeRecipeList.adapter = recipeSectionAdapter
         }
 
 
         viewModel.initRecipeList.observe(viewLifecycleOwner) { mergedRecipes ->
-            Log.e(TAG, "onViewCreated: observes")
             when(mergedRecipes) {
                 is MergedRecipes.PopularRecipes -> {
                     val popularRecipeSection = RecipeSection(
@@ -64,16 +59,8 @@ class LoungeFragment : Fragment() {
                         mergedRecipes.popularRecipes.getContentIfNotHandled() as ArrayList<Recipe>,
                         RecipeSectionType.POPULAR_RECIPE
                     )
-
-                    if (recipeSectionAdapter.itemCount > 0) {
-                            recipeSectionList.add(popularRecipeSection)
-                            recipeSectionAdapter.notifyItemInserted(recipeSectionList.size)
-                    } else {
-                        recipeSectionList.add(popularRecipeSection)
-                        recipeSectionAdapter.submitList(recipeSectionList)
-                    }
-
-                    viewModel.popularRecipesLiveData.removeObservers(viewLifecycleOwner)
+                    recipeSectionList.add(popularRecipeSection)
+                    recipeSectionAdapter.submitList(recipeSectionList)
                 }
                 is MergedRecipes.BreakfastRecipes -> {
                     val breakfastRecipeSection = RecipeSection(
@@ -82,15 +69,8 @@ class LoungeFragment : Fragment() {
                         mergedRecipes.breakfastRecipes.getContentIfNotHandled() as ArrayList<Recipe>,
                         RecipeSectionType.BREAKFAST_RECIPE
                     )
-
-
-                    GlobalScope.launch(Dispatchers.Main) {
-                        delay(500)
-                        recipeSectionList.add(breakfastRecipeSection)
-                        recipeSectionAdapter.notifyItemInserted(recipeSectionAdapter.itemCount)
-                    }
-
-                    viewModel.cheapRecipesLiveData.removeObservers(viewLifecycleOwner)
+                    recipeSectionList.add(breakfastRecipeSection)
+                    recipeSectionAdapter.notifyItemInserted(recipeSectionAdapter.itemCount)
                     viewModel.initRecipeList.removeObservers(viewLifecycleOwner)
                 }
             }
@@ -101,7 +81,6 @@ class LoungeFragment : Fragment() {
             when(mergedRecipes) {
                 is MergedRecipes.PopularRecipes -> {
                     mergedRecipes.popularRecipes.getContentIfNotHandled()?.let { recipeList ->
-                        Log.e(TAG, "onViewCreated: list size is ${recipeList.size}")
                         recipeSectionAdapter.addMoreRecipes(
                             recipeList,
                             RecipeSectionType.POPULAR_RECIPE
@@ -109,7 +88,12 @@ class LoungeFragment : Fragment() {
                     }
                 }
                 is MergedRecipes.BreakfastRecipes -> {
-
+                    mergedRecipes.breakfastRecipes.getContentIfNotHandled()?.let { recipeList ->
+                        recipeSectionAdapter.addMoreRecipes(
+                            recipeList,
+                            RecipeSectionType.BREAKFAST_RECIPE
+                        )
+                    }
                 }
             }
         }

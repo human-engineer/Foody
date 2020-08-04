@@ -11,7 +11,8 @@ interface RecipeService {
 
     @GET("complexSearch?apiKey=$API_KEY")
     suspend fun getRecipesByType(
-        @Query("type") type: String
+        @Query("type") type: String,
+        @Query("offset") page: Int = 0
     ) : ApiResponse<RecipesWrapper>
 
 
@@ -19,5 +20,6 @@ interface RecipeService {
     suspend fun getPopularRecipes(
         @Query("number") number: Int
     ) : ApiResponse<PopularRecipesResponse>
+
 
 }
