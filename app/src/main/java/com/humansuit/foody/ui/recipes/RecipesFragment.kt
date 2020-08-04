@@ -1,4 +1,4 @@
-package com.humansuit.foody.ui.view
+package com.humansuit.foody.ui.recipes
 
 import android.os.Bundle
 import android.view.LayoutInflater

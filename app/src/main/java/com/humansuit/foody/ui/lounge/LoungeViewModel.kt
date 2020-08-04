@@ -1,5 +1,6 @@
-package com.humansuit.foody.ui.view
+package com.humansuit.foody.ui.lounge
 
+import android.util.Log
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 
 class LoungeViewModel @ViewModelInject constructor(
@@ -23,49 +25,47 @@ class LoungeViewModel @ViewModelInject constructor(
     @Assisted private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val TAG = "MainViewModel"
+    private val TAG = this.javaClass.name
     val progressBarState = MutableLiveData<Boolean>()
-    private val popularRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
-    private val breakfastRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
+    val popularRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
+    val breakfastRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
 
-    val paginationListLivaData = MediatorLiveData<MergedRecipes>()
-    val initialListLiveData = MediatorLiveData<MergedRecipes>()
+    val paginationListLivaData = MediatorLiveData<Event<MergedRecipes>>()
+    val initialListLiveData = MediatorLiveData<Event<MergedRecipes>>()
     var isDataLoading = false
 
 
+    init {
+        Timber.d("$TAG is initialized")
+        addInitialListSources()
+        addPaginationListSources()
+    }
+
     fun fetchInitialRecipeSections(number: Int = RECIPE_PAGE_SIZE) = viewModelScope.launch {
+        Timber.tag(TAG).d("fetchInitialRecipeSection called")
         combine(getPopularRecipeFlow(number), getBreakfastRecipeFlow(number)) { popularRecipes,
                                                                                 breakfastRecipes ->
-            popularRecipesLiveData.postValue(Event(popularRecipes))
-            breakfastRecipesLiveData.postValue(Event(breakfastRecipes))
+            popularRecipesLiveData.value = Event(popularRecipes)
+            breakfastRecipesLiveData.value = Event(breakfastRecipes)
         }
             .onStart { progressBarState.value = true }
-            .collect {
-                initialListLiveData.apply {
-                    addSource(popularRecipesLiveData) { list ->
-                        initialListLiveData.value =
-                            MergedRecipes.PopularRecipes(list, RecipeSectionType.POPULAR_RECIPE)
-                    }
-                    addSource(breakfastRecipesLiveData) { list ->
-                        initialListLiveData.value =
-                            MergedRecipes.BreakfastRecipes(list, RecipeSectionType.BREAKFAST_RECIPE)
-                    }
-                    progressBarState.postValue(false)
-                }
-            }
+            .collect { progressBarState.postValue(false) }
     }
 
 
-    fun loadNextSectionPage(recipeSection: RecipeSection, page: Int) {
+
+
+
+    fun loadNextSectionPage(recipeSection: RecipeSection, page: Int) = viewModelScope.launch {
         when(recipeSection.recipeSectionType) {
             RecipeSectionType.POPULAR_RECIPE -> {
-                fetchMorePopularRecipes(
+                fetchPopularRecipes(
                     number = recipeSection.pageSize,
                     page = page
                 )
             }
             RecipeSectionType.BREAKFAST_RECIPE -> {
-                fetchMoreBreakfastRecipes(
+                fetchBreakfastRecipes(
                     number = recipeSection.pageSize,
                     page = page
                 )
@@ -74,33 +74,21 @@ class LoungeViewModel @ViewModelInject constructor(
     }
 
 
-    private fun fetchMorePopularRecipes(number: Int = RECIPE_PAGE_SIZE, page: Int) = viewModelScope.launch {
+    private suspend fun fetchPopularRecipes(number: Int = RECIPE_PAGE_SIZE, page: Int = 0) {
         getPopularRecipeFlow(number, page)
             .onStart { progressBarState.value = true }
             .collect { recipes ->
-                popularRecipesLiveData.postValue(Event(recipes))
-                try {
-                    paginationListLivaData.addSource(popularRecipesLiveData) {
-                        paginationListLivaData.value =
-                            MergedRecipes.PopularRecipes(it, RecipeSectionType.POPULAR_RECIPE)
-                    }
-                } catch (e: Exception) { }
+                popularRecipesLiveData.value = Event(recipes)
                 progressBarState.postValue(false)
             }
     }
 
 
-    private fun fetchMoreBreakfastRecipes(number: Int, page: Int) = viewModelScope.launch {
+    private suspend fun fetchBreakfastRecipes(number: Int = RECIPE_PAGE_SIZE, page: Int = 0) {
         getBreakfastRecipeFlow(number, page)
             .onStart { progressBarState.value = true }
             .collect { recipes ->
-                breakfastRecipesLiveData.postValue(Event(recipes))
-                try {
-                    paginationListLivaData.addSource(breakfastRecipesLiveData) {
-                        paginationListLivaData.value =
-                            MergedRecipes.BreakfastRecipes(it, RecipeSectionType.BREAKFAST_RECIPE)
-                    }
-                } catch (e: Exception) { }
+                breakfastRecipesLiveData.value = Event(recipes)
                 progressBarState.postValue(false)
             }
     }
@@ -111,7 +99,7 @@ class LoungeViewModel @ViewModelInject constructor(
             recipeRepository.fetchPopularRecipes(
                 number,
                 page,
-                onError = { }
+                onError = { Log.e(TAG, "getPopularRecipeFlow: here") }
             )
         }
 
@@ -131,5 +119,34 @@ class LoungeViewModel @ViewModelInject constructor(
 
     private suspend fun getBreakfastRecipesFromApi(number: Int, page: Int)
             = withContext(Dispatchers.IO) { recipeRepository.fetchBreakfastRecipesFromApi(number, page) }
+
+
+
+    fun addInitialListSources() {
+        initialListLiveData.apply {
+            addSource(popularRecipesLiveData) { list ->
+                initialListLiveData.value =
+                    Event(MergedRecipes.PopularRecipes(list, RecipeSectionType.POPULAR_RECIPE))
+            }
+            addSource(breakfastRecipesLiveData) { list ->
+                initialListLiveData.value =
+                    Event(MergedRecipes.BreakfastRecipes(list, RecipeSectionType.BREAKFAST_RECIPE))
+            }
+        }
+    }
+
+
+    private fun addPaginationListSources() {
+        paginationListLivaData.apply {
+            addSource(popularRecipesLiveData) {
+                paginationListLivaData.value =
+                    Event(MergedRecipes.PopularRecipes(it, RecipeSectionType.POPULAR_RECIPE))
+            }
+            addSource(breakfastRecipesLiveData) {
+                paginationListLivaData.value =
+                    Event(MergedRecipes.BreakfastRecipes(it, RecipeSectionType.BREAKFAST_RECIPE))
+            }
+        }
+    }
 
 }

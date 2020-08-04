@@ -8,7 +8,7 @@
         <import type="kotlinx.coroutines.flow.Flow"/>
         <variable
             name="viewModel"
-            type="com.humansuit.foody.ui.view.LoungeViewModel" />
+            type="com.humansuit.foody.ui.lounge.LoungeViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

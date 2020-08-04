@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.humansuit.foody.databinding.RecipeSectionBinding
 import com.humansuit.foody.model.Recipe
 import com.humansuit.foody.model.RecipeSection
-import com.humansuit.foody.ui.view.LoungeViewModel
+import com.humansuit.foody.ui.lounge.LoungeViewModel
 import com.humansuit.foody.utils.CustomViewHolder
 import com.humansuit.foody.utils.RecipeSectionType
 import com.humansuit.foody.utils.RecyclerViewPaginator

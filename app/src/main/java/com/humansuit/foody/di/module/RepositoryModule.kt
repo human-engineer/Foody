@@ -14,7 +14,6 @@ import dagger.hilt.android.scopes.ActivityRetainedScoped
 @InstallIn(ActivityRetainedComponent::class)
 object RepositoryModule {
 
-
     @Provides
     @ActivityRetainedScoped
     fun provideRecipesRepository(
