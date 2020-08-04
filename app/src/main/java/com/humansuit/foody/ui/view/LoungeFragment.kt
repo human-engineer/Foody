@@ -1,13 +1,12 @@
 package com.humansuit.foody.ui.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.observe
+import androidx.lifecycle.Observer
 import com.humansuit.foody.databinding.FragmentLoungeBinding
 import com.humansuit.foody.model.Recipe
 import com.humansuit.foody.model.RecipeSection
@@ -20,16 +19,11 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class LoungeFragment : Fragment() {
 
-    private val TAG = "MainFragment"
     private lateinit var binding: FragmentLoungeBinding
     private val viewModel by viewModels<LoungeViewModel>()
-    private var bool = true
-    private var previousTotal = 0
-    private var visibleThreshold = 5
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentLoungeBinding.inflate(inflater, container, false)
@@ -45,58 +39,77 @@ class LoungeFragment : Fragment() {
         val recipeSectionAdapter = RecipeSectionAdapter(viewModel)
 
         binding.apply {
-            viewModel = this@LoungeFragment.viewModel.apply { fetchStartData() }
+            viewModel = this@LoungeFragment.viewModel.apply { fetchInitialRecipeSections() }
             loungeRecipeList.adapter = recipeSectionAdapter
         }
 
+        val initialListObserver = createInitialListObserver(recipeSectionList, recipeSectionAdapter)
+        val paginationListObserver = createPaginationObserver(recipeSectionAdapter)
 
-        viewModel.initRecipeList.observe(viewLifecycleOwner) { mergedRecipes ->
-            when(mergedRecipes) {
-                is MergedRecipes.PopularRecipes -> {
-                    val popularRecipeSection = RecipeSection(
-                        0,
-                        "Popular recipes",
-                        mergedRecipes.popularRecipes.getContentIfNotHandled() as ArrayList<Recipe>,
-                        RecipeSectionType.POPULAR_RECIPE
+        viewModel.initialListLiveData.observe(viewLifecycleOwner, initialListObserver)
+        viewModel.paginationListLivaData.observe(viewLifecycleOwner, paginationListObserver)
+    }
+
+
+    private fun createInitialListObserver(
+        recipeSectionList: ArrayList<RecipeSection>,
+        recipeSectionAdapter: RecipeSectionAdapter
+    ) = Observer<MergedRecipes> { mergedRecipes ->
+        when (mergedRecipes) {
+            is MergedRecipes.PopularRecipes -> {
+                mergedRecipes.popularRecipes.getContentIfNotHandled()?.let { popularRecipes ->
+                    val recipeSection = createRecipeSection(
+                        sectionType = mergedRecipes.sectionType,
+                        recipeList = popularRecipes as ArrayList<Recipe>
                     )
-                    recipeSectionList.add(popularRecipeSection)
+                    recipeSectionList.add(recipeSection)
                     recipeSectionAdapter.submitList(recipeSectionList)
                 }
-                is MergedRecipes.BreakfastRecipes -> {
-                    val breakfastRecipeSection = RecipeSection(
-                        1,
-                        "Breakfast recipes",
-                        mergedRecipes.breakfastRecipes.getContentIfNotHandled() as ArrayList<Recipe>,
-                        RecipeSectionType.BREAKFAST_RECIPE
+            }
+            is MergedRecipes.BreakfastRecipes -> {
+                mergedRecipes.breakfastRecipes.getContentIfNotHandled()?.let { breakfastRecipes ->
+                    val recipeSection = createRecipeSection(
+                        sectionType = mergedRecipes.sectionType,
+                        recipeList = breakfastRecipes as ArrayList<Recipe>
                     )
-                    recipeSectionList.add(breakfastRecipeSection)
-                    recipeSectionAdapter.notifyItemInserted(recipeSectionAdapter.itemCount)
-                    viewModel.initRecipeList.removeObservers(viewLifecycleOwner)
+                    recipeSectionList.add(recipeSection)
+                    recipeSectionAdapter.submitList(recipeSectionList)
                 }
+                viewModel.initialListLiveData.removeObservers(viewLifecycleOwner)
             }
         }
-
-
-        viewModel.paginationLivaData.observe(viewLifecycleOwner) { mergedRecipes ->
-            when(mergedRecipes) {
-                is MergedRecipes.PopularRecipes -> {
-                    mergedRecipes.popularRecipes.getContentIfNotHandled()?.let { recipeList ->
-                        recipeSectionAdapter.addMoreRecipes(
-                            recipeList,
-                            RecipeSectionType.POPULAR_RECIPE
-                        )
-                    }
-                }
-                is MergedRecipes.BreakfastRecipes -> {
-                    mergedRecipes.breakfastRecipes.getContentIfNotHandled()?.let { recipeList ->
-                        recipeSectionAdapter.addMoreRecipes(
-                            recipeList,
-                            RecipeSectionType.BREAKFAST_RECIPE
-                        )
-                    }
-                }
-            }
-        }
+        return@Observer
     }
+
+
+    private fun createPaginationObserver(
+        recipeSectionAdapter: RecipeSectionAdapter
+    ) = Observer<MergedRecipes> { mergedRecipes ->
+        when (mergedRecipes) {
+            is MergedRecipes.PopularRecipes -> {
+                mergedRecipes.popularRecipes.getContentIfNotHandled()?.let { recipeList ->
+                    recipeSectionAdapter.addMoreRecipes(
+                        recipeList,
+                        mergedRecipes.sectionType
+                    )
+                }
+            }
+            is MergedRecipes.BreakfastRecipes -> {
+                mergedRecipes.breakfastRecipes.getContentIfNotHandled()?.let { recipeList ->
+                    recipeSectionAdapter.addMoreRecipes(
+                        recipeList,
+                        mergedRecipes.sectionType
+                    )
+                }
+            }
+        }
+        return@Observer
+    }
+
+
+    private fun createRecipeSection(
+        sectionType: RecipeSectionType,
+        recipeList: ArrayList<Recipe>
+    ) = RecipeSection(sectionType.id, sectionType.title, recipeList, sectionType)
 
 }

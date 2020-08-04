@@ -14,13 +14,12 @@ fun ImageView.loadImage(imageUrl: String?) {
         .load(imageUrl)
         .placeholder(R.drawable.ic_recipe_placeholder_temp)
         .error(R.drawable.ic_recipe_placeholder_temp)
-        .fitCenter()
+        .centerCrop()
         .into(this)
 }
 
 
 @BindingAdapter("gone")
 fun ProgressBar.bindGone(state: Boolean) {
-    Log.e("TAG", "bindGone: State -> $state")
     this.visibility = if (state) View.VISIBLE else View.INVISIBLE
 }

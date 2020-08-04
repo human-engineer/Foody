@@ -1,6 +1,5 @@
 package com.humansuit.foody.utils
 
-import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -15,14 +14,17 @@ abstract class RecyclerViewPaginator(private val layoutManager: LinearLayoutMana
         val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
 
 
-        if (!isLoading() && !isLastPage()) {
-            if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0 && !recyclerView.canScrollHorizontally(1)) {
+        if (canLoadMore()) {
+            if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                && firstVisibleItemPosition >= 0
+                && !recyclerView.canScrollHorizontally(1))
+            {
                 loadMoreItems()
-                Log.e("RecyclerView paginator", "onScrolled: Loading more items...")
             }
         }
     }
 
+    private fun canLoadMore() = !isLoading() && !isLastPage()
 
     protected abstract fun loadMoreItems()
     abstract fun isLastPage() : Boolean

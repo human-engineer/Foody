@@ -12,13 +12,15 @@ interface RecipeService {
     @GET("complexSearch?apiKey=$API_KEY")
     suspend fun getRecipesByType(
         @Query("type") type: String,
-        @Query("offset") page: Int = 0
+        @Query("offset") page: Int,
+        @Query("number") number: Int
     ) : ApiResponse<RecipesWrapper>
 
 
     @GET("random?apiKey=$API_KEY")
     suspend fun getPopularRecipes(
-        @Query("number") number: Int
+        @Query("number") number: Int,
+        @Query("offset") page: Int
     ) : ApiResponse<PopularRecipesResponse>
 
 
