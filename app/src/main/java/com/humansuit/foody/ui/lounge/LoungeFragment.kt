@@ -44,7 +44,7 @@ class LoungeFragment : Fragment() {
         }
 
         viewModel.apply {
-            fetchInitialRecipeSections()
+            loadInitialRecipeSections()
             initialListLiveData.observe(viewLifecycleOwner) { data -> observeData(data) }
             paginationListLivaData.observe(viewLifecycleOwner) { data -> observeData(data) }
         }

@@ -7,6 +7,7 @@ import androidx.lifecycle.*
 import com.humansuit.foody.model.Recipe
 import com.humansuit.foody.model.RecipeSection
 import com.humansuit.foody.repository.RecipeRepository
+import com.humansuit.foody.utils.Constants.API_ERROR
 import com.humansuit.foody.utils.Constants.RECIPE_PAGE_SIZE
 import com.humansuit.foody.utils.Event
 import com.humansuit.foody.utils.MergedRecipes
@@ -26,46 +27,46 @@ class LoungeViewModel @ViewModelInject constructor(
 ) : ViewModel() {
 
     private val TAG = this.javaClass.name
-    val progressBarState = MutableLiveData<Boolean>()
-    val popularRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
-    val breakfastRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
+    private val popularRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
+    private val breakfastRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
 
     val paginationListLivaData = MediatorLiveData<MergedRecipes>()
     val initialListLiveData = MediatorLiveData<Event<MergedRecipes>>()
+    val progressBarState = MutableLiveData<Boolean>()
     var isDataLoading = false
 
 
     init {
-        Timber.d("$TAG is initialized")
         addInitialListSources()
         addPaginationListSources()
     }
 
-    fun fetchInitialRecipeSections(number: Int = RECIPE_PAGE_SIZE) = viewModelScope.launch {
-        Timber.tag(TAG).d("fetchInitialRecipeSection called")
-        combine(getPopularRecipeFlow(number), getBreakfastRecipeFlow(number)) { popularRecipes,
-                                                                                breakfastRecipes ->
-            popularRecipesLiveData.value = Event(popularRecipes)
-            breakfastRecipesLiveData.value = Event(breakfastRecipes)
+
+    fun loadInitialRecipeSections(number: Int = RECIPE_PAGE_SIZE) = viewModelScope.launch {
+        Timber.tag(TAG).d("Fetching initial recipes.")
+        combine(
+            getPopularRecipeFlow(number),
+            getBreakfastRecipeFlow(number)
+        ) { popularRecipes, breakfastRecipes ->
+            popularRecipesLiveData.postValue(Event(popularRecipes))
+            breakfastRecipesLiveData.postValue(Event(breakfastRecipes))
         }
             .onStart { progressBarState.value = true }
             .collect { progressBarState.postValue(false) }
     }
 
 
-
-
-
     fun loadNextSectionPage(recipeSection: RecipeSection, page: Int) = viewModelScope.launch {
+        Timber.tag(TAG).d("Loading next section page.")
         when(recipeSection.recipeSectionType) {
             RecipeSectionType.POPULAR_RECIPE -> {
-                fetchPopularRecipes(
+                loadPopularRecipes(
                     number = recipeSection.pageSize,
                     page = page
                 )
             }
             RecipeSectionType.BREAKFAST_RECIPE -> {
-                fetchBreakfastRecipes(
+                loadBreakfastRecipes(
                     number = recipeSection.pageSize,
                     page = page
                 )
@@ -74,21 +75,21 @@ class LoungeViewModel @ViewModelInject constructor(
     }
 
 
-    private suspend fun fetchPopularRecipes(number: Int = RECIPE_PAGE_SIZE, page: Int = 0) {
+    private suspend fun loadPopularRecipes(number: Int, page: Int) {
         getPopularRecipeFlow(number, page)
             .onStart { progressBarState.value = true }
             .collect { recipes ->
-                popularRecipesLiveData.value = Event(recipes)
+                popularRecipesLiveData.postValue(Event(recipes))
                 progressBarState.postValue(false)
             }
     }
 
 
-    private suspend fun fetchBreakfastRecipes(number: Int = RECIPE_PAGE_SIZE, page: Int = 0) {
+    private suspend fun loadBreakfastRecipes(number: Int, page: Int) {
         getBreakfastRecipeFlow(number, page)
             .onStart { progressBarState.value = true }
             .collect { recipes ->
-                breakfastRecipesLiveData.value = Event(recipes)
+                breakfastRecipesLiveData.postValue(Event(recipes))
                 progressBarState.postValue(false)
             }
     }
@@ -97,9 +98,8 @@ class LoungeViewModel @ViewModelInject constructor(
     private suspend fun getPopularRecipeFlow(number: Int, page: Int = 0) =
         withContext(Dispatchers.IO) {
             recipeRepository.fetchPopularRecipes(
-                number,
-                page,
-                onError = { Log.e(TAG, "getPopularRecipeFlow: here") }
+                number, page,
+                onError = { error -> API_ERROR("Error while fetching popular recipe: $error") }
             )
         }
 
@@ -108,21 +108,14 @@ class LoungeViewModel @ViewModelInject constructor(
         withContext(Dispatchers.IO) {
             recipeRepository.fetchBreakfastRecipes(
                 number, page,
-                onError = { }
+                onError = { error ->
+                    API_ERROR("Error while fetching breakfast recipe: $error")
+                }
             )
         }
 
 
-    private suspend fun getPopularRecipesFromApi(number: Int, page: Int)
-            = withContext(Dispatchers.IO) { recipeRepository.fetchPopularRecipesFromApi(number, page) }
-
-
-    private suspend fun getBreakfastRecipesFromApi(number: Int, page: Int)
-            = withContext(Dispatchers.IO) { recipeRepository.fetchBreakfastRecipesFromApi(number, page) }
-
-
-
-    fun addInitialListSources() {
+    private fun addInitialListSources() {
         initialListLiveData.apply {
             addSource(popularRecipesLiveData) { list ->
                 initialListLiveData.value =

@@ -1,5 +1,7 @@
 package com.humansuit.foody.utils
 
+import timber.log.Timber
+
 object Constants {
 
     //const val API_KEY = "723aa747c8b14ae0853f6f96e40567d6"
@@ -8,5 +10,8 @@ object Constants {
 
     const val RECIPES_BASE_URL = "https://api.spoonacular.com/recipes/"
     const val RECIPE_PAGE_SIZE = 10
+
+
+    val API_ERROR = { message: String -> Timber.e(message) }
 
 }

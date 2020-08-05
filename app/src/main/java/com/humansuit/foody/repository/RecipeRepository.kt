@@ -16,12 +16,11 @@ class RecipeRepository @Inject constructor(
     private val recipeDao: RecipeDao
 ) : Repository {
 
-    private val TAG = "RecipeRepository"
-
+    private val TAG = this.javaClass.name
 
     suspend fun fetchPopularRecipes(
         number: Int, page: Int,
-        onError: () -> Unit
+        onError: (error: String) -> Unit
     ) = flow {
         val recipesListFromDb = recipeDao.getPopularRecipeList(page * 10)
         if (recipesListFromDb.isEmpty()) {
@@ -33,16 +32,16 @@ class RecipeRepository @Inject constructor(
                         emit(response.recipes)
                     }
                 }
-                .onError { onError() }
-                .onFailure { onError() }
-                .onException { onError() }
+                .onError { onError(errorBody.toString()) }
+                .onFailure { onError("Unknown failure") }
+                .onException { onError(exception.message.toString()) }
         } else emit(recipesListFromDb)
     }.flowOn(Dispatchers.IO)
 
 
     suspend fun fetchBreakfastRecipes(
         number: Int, page: Int,
-        onError: () -> Unit
+        onError: (error: String) -> Unit
     ) = flow {
         val recipesListFromDb = recipeDao.getRecipeListByType(page * 10, "breakfast")
         if (recipesListFromDb.isEmpty()) {
@@ -54,9 +53,9 @@ class RecipeRepository @Inject constructor(
                         emit(response.results)
                     }
                 }
-                .onError { onError() }
-                .onFailure { onError() }
-                .onException { onError() }
+                .onError { onError(errorBody.toString()) }
+                .onFailure { onError("Unknown failure") }
+                .onException { onError(exception.message.toString()) }
         } else emit(recipesListFromDb)
     }.flowOn(Dispatchers.IO)
 
