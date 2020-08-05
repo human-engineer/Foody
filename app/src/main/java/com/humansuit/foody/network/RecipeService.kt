@@ -1,7 +1,7 @@
 package com.humansuit.foody.network
 
 import com.humansuit.foody.model.response.PopularRecipesResponse
-import com.humansuit.foody.model.response.RecipesByTypeResponse
+import com.humansuit.foody.model.response.TypedRecipeResponse
 import com.humansuit.foody.utils.Constants.API_KEY
 import com.skydoves.sandwich.ApiResponse
 import retrofit2.http.GET
@@ -14,7 +14,7 @@ interface RecipeService {
         @Query("type") type: String,
         @Query("offset") page: Int,
         @Query("number") number: Int
-    ) : ApiResponse<RecipesByTypeResponse>
+    ) : ApiResponse<TypedRecipeResponse>
 
 
     @GET("random?apiKey=$API_KEY")

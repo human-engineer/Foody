@@ -1,13 +1,13 @@
 package com.humansuit.foody.ui.lounge
 
-import android.util.Log
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
+import com.humansuit.foody.model.Error
 import com.humansuit.foody.model.Recipe
 import com.humansuit.foody.model.RecipeSection
 import com.humansuit.foody.repository.RecipeRepository
-import com.humansuit.foody.utils.Constants.API_ERROR
+import com.humansuit.foody.utils.Constants.API_ERROR_LOG
 import com.humansuit.foody.utils.Constants.RECIPE_PAGE_SIZE
 import com.humansuit.foody.utils.Event
 import com.humansuit.foody.utils.MergedRecipes
@@ -34,6 +34,9 @@ class LoungeViewModel @ViewModelInject constructor(
     val initialListLiveData = MediatorLiveData<Event<MergedRecipes>>()
     val progressBarState = MutableLiveData<Boolean>()
     var isDataLoading = false
+
+
+    val errorLiveData = MutableLiveData<Error>()
 
 
     init {
@@ -99,7 +102,10 @@ class LoungeViewModel @ViewModelInject constructor(
         withContext(Dispatchers.IO) {
             recipeRepository.fetchPopularRecipes(
                 number, page,
-                onError = { error -> API_ERROR("Error while fetching popular recipe: $error") }
+                onError = { message, error ->
+                    API_ERROR_LOG("Error while fetching popular recipe: $message")
+                    errorLiveData.postValue(error)
+                }
             )
         }
 
@@ -108,8 +114,9 @@ class LoungeViewModel @ViewModelInject constructor(
         withContext(Dispatchers.IO) {
             recipeRepository.fetchBreakfastRecipes(
                 number, page,
-                onError = { error ->
-                    API_ERROR("Error while fetching breakfast recipe: $error")
+                onError = { message, error  ->
+                    API_ERROR_LOG("Error while fetching breakfast recipe: $message")
+                    errorLiveData.postValue(error)
                 }
             )
         }

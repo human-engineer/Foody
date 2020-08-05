@@ -1,6 +1,7 @@
 package com.humansuit.foody.ui.lounge
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,7 +36,7 @@ class LoungeFragment : Fragment() {
 
         val recipeSectionAdapter = RecipeSectionAdapter(viewModel)
         val recipeSectionList = arrayListOf<RecipeSection>()
-        val observeData = { data: Any ->
+        val observeList = { data: Any ->
             Observer.observeData(
                 data, recipeSectionList,
                 recipeSectionAdapter,
@@ -45,8 +46,15 @@ class LoungeFragment : Fragment() {
 
         viewModel.apply {
             loadInitialRecipeSections()
-            initialListLiveData.observe(viewLifecycleOwner) { data -> observeData(data) }
-            paginationListLivaData.observe(viewLifecycleOwner) { data -> observeData(data) }
+            initialListLiveData.observe(viewLifecycleOwner) { data -> observeList(data) }
+            paginationListLivaData.observe(viewLifecycleOwner) { data -> observeList(data) }
+        }
+
+
+        viewModel.errorLiveData.observe(viewLifecycleOwner) { error ->
+            binding.recipeList.visibility = View.GONE
+            binding.errorLayout.root.visibility = View.VISIBLE
+            binding.errorLayout.error = error
         }
 
         binding.apply {

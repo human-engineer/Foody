@@ -1,7 +1,12 @@
 package com.humansuit.foody.repository
 
+import com.humansuit.foody.R
 import com.humansuit.foody.database.RecipeDao
+import com.humansuit.foody.model.Error
 import com.humansuit.foody.network.RecipeApi
+import com.humansuit.foody.utils.Constants.ErrorMessage.ON_ERROR
+import com.humansuit.foody.utils.Constants.ErrorMessage.ON_EXCEPTION
+import com.humansuit.foody.utils.Constants.ErrorMessage.ON_FAILURE
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onException
 import com.skydoves.sandwich.onFailure
@@ -20,7 +25,7 @@ class RecipeRepository @Inject constructor(
 
     suspend fun fetchPopularRecipes(
         number: Int, page: Int,
-        onError: (error: String) -> Unit
+        onError: (message: String, error: Error) -> Unit
     ) = flow {
         val recipesListFromDb = recipeDao.getPopularRecipeList(page * 10)
         if (recipesListFromDb.isEmpty()) {
@@ -32,16 +37,25 @@ class RecipeRepository @Inject constructor(
                         emit(response.recipes)
                     }
                 }
-                .onError { onError(errorBody.toString()) }
-                .onFailure { onError("Unknown failure") }
-                .onException { onError(exception.message.toString()) }
+                .onError {
+                    val error = Error(ON_ERROR, R.drawable.ic_error)
+                    onError(errorBody.toString(), error)
+                }
+                .onFailure {
+                    val error = Error(ON_FAILURE, R.drawable.ic_error)
+                    onError("Unknown failure", error)
+                }
+                .onException {
+                    val error = Error(ON_EXCEPTION, R.drawable.ic_error)
+                    onError(exception.message.toString(), error)
+                }
         } else emit(recipesListFromDb)
     }.flowOn(Dispatchers.IO)
 
 
     suspend fun fetchBreakfastRecipes(
         number: Int, page: Int,
-        onError: (error: String) -> Unit
+        onError: (message: String, error: Error) -> Unit
     ) = flow {
         val recipesListFromDb = recipeDao.getRecipeListByType(page * 10, "breakfast")
         if (recipesListFromDb.isEmpty()) {
@@ -53,9 +67,18 @@ class RecipeRepository @Inject constructor(
                         emit(response.results)
                     }
                 }
-                .onError { onError(errorBody.toString()) }
-                .onFailure { onError("Unknown failure") }
-                .onException { onError(exception.message.toString()) }
+                .onError {
+                    val error = Error(ON_ERROR, R.drawable.ic_error)
+                    onError(errorBody.toString(), error)
+                }
+                .onFailure {
+                    val error = Error(ON_FAILURE, R.drawable.ic_error)
+                    onError("Unknown failure", error)
+                }
+                .onException {
+                    val error = Error(ON_EXCEPTION, R.drawable.ic_error)
+                    onError(exception.message.toString(), error)
+                }
         } else emit(recipesListFromDb)
     }.flowOn(Dispatchers.IO)
 
