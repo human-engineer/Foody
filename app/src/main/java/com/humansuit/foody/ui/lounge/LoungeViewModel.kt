@@ -30,7 +30,7 @@ class LoungeViewModel @ViewModelInject constructor(
     val popularRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
     val breakfastRecipesLiveData = MutableLiveData<Event<List<Recipe>>>()
 
-    val paginationListLivaData = MediatorLiveData<Event<MergedRecipes>>()
+    val paginationListLivaData = MediatorLiveData<MergedRecipes>()
     val initialListLiveData = MediatorLiveData<Event<MergedRecipes>>()
     var isDataLoading = false
 
@@ -140,11 +140,11 @@ class LoungeViewModel @ViewModelInject constructor(
         paginationListLivaData.apply {
             addSource(popularRecipesLiveData) {
                 paginationListLivaData.value =
-                    Event(MergedRecipes.PopularRecipes(it, RecipeSectionType.POPULAR_RECIPE))
+                    MergedRecipes.PopularRecipes(it, RecipeSectionType.POPULAR_RECIPE)
             }
             addSource(breakfastRecipesLiveData) {
                 paginationListLivaData.value =
-                    Event(MergedRecipes.BreakfastRecipes(it, RecipeSectionType.BREAKFAST_RECIPE))
+                    MergedRecipes.BreakfastRecipes(it, RecipeSectionType.BREAKFAST_RECIPE)
             }
         }
     }
