@@ -8,34 +8,9 @@ import com.humansuit.foody.utils.MergedRecipes
 import com.humansuit.foody.utils.RecipeSectionType
 
 
-object Observer {
+object LoungeObserver {
 
-    fun observeData(
-        data: Any,
-        recipeSectionList: ArrayList<RecipeSection>,
-        recipeSectionAdapter: RecipeSectionAdapter,
-        removeObservers: () -> Unit
-    ) {
-        when (data) {
-            is Event<*> -> {
-                observeInitialLiveData(
-                    data = data as Event<MergedRecipes>,
-                    recipeSectionList = recipeSectionList,
-                    recipeSectionAdapter = recipeSectionAdapter,
-                    removeObservers = removeObservers
-                )
-            }
-            is MergedRecipes -> {
-                observePaginationLivaData(
-                    mergedRecipes = data,
-                    recipeSectionAdapter = recipeSectionAdapter
-                )
-            }
-        }
-    }
-
-
-    private fun observeInitialLiveData(
+    fun observeInitialLiveData(
         data: Event<MergedRecipes>,
         recipeSectionList: ArrayList<RecipeSection>,
         recipeSectionAdapter: RecipeSectionAdapter,
@@ -65,12 +40,12 @@ object Observer {
                 }
             }
         }
-        if (data.hasBeenHandled && recipeSectionList.size >= 2)
+        if (data.hasBeenHandled && recipeSectionList.size >= RecipeSectionType.values().size)
             removeObservers()
     }
 
 
-    private fun observePaginationLivaData(
+    fun observePaginationLivaData(
         mergedRecipes: MergedRecipes,
         recipeSectionAdapter: RecipeSectionAdapter
     ) {

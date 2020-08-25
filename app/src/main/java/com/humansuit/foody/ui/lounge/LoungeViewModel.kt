@@ -32,11 +32,11 @@ class LoungeViewModel @ViewModelInject constructor(
 
     val paginationListLivaData = MediatorLiveData<MergedRecipes>()
     val initialListLiveData = MediatorLiveData<Event<MergedRecipes>>()
-    val progressBarState = MutableLiveData<Boolean>()
-    var isDataLoading = false
-
 
     val errorLiveData = MutableLiveData<Error>()
+    val isErrorState = MutableLiveData<Boolean>()
+    val progressBarState = MutableLiveData<Boolean>()
+    var isDataLoading = false
 
 
     init {
@@ -105,6 +105,7 @@ class LoungeViewModel @ViewModelInject constructor(
                 onError = { message, error ->
                     API_ERROR_LOG("Error while fetching popular recipe: $message")
                     errorLiveData.postValue(error)
+                    //isErrorState.postValue(true)
                 }
             )
         }
@@ -117,6 +118,7 @@ class LoungeViewModel @ViewModelInject constructor(
                 onError = { message, error  ->
                     API_ERROR_LOG("Error while fetching breakfast recipe: $message")
                     errorLiveData.postValue(error)
+                    //isErrorState.postValue(true)
                 }
             )
         }

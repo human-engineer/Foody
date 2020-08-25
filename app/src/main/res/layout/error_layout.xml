@@ -8,6 +8,9 @@
         <variable
             name="error"
             type="com.humansuit.foody.model.Error"/>
+        <variable
+            name="isVisible"
+            type="Boolean" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -16,6 +19,7 @@
         android:background="#E4ECF1"
         android:orientation="vertical"
         android:visibility="gone"
+        app:gone="@{ isVisible }"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
@@ -37,22 +41,24 @@
             android:layout_marginBottom="48dp"
             android:text="@{ error.message }"
             android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@+id/button3"
+            app:layout_constraintBottom_toTopOf="@+id/retryButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imageView3"
             app:layout_constraintVertical_chainStyle="packed" />
 
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/retryButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Retry"
+            android:background="@color/colorPrimary"
+            android:text="retry"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/textView2"
             app:layout_constraintStart_toStartOf="@+id/textView2"
             app:layout_constraintTop_toBottomOf="@+id/textView2"
             app:layout_constraintVertical_chainStyle="packed" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

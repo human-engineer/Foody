@@ -12,6 +12,7 @@ import com.skydoves.sandwich.onException
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.suspendOnSuccess
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
@@ -27,6 +28,7 @@ class RecipeRepository @Inject constructor(
         number: Int, page: Int,
         onError: (message: String, error: Error) -> Unit
     ) = flow {
+        delay(1000)
         val recipesListFromDb = recipeDao.getPopularRecipeList(page * 10)
         if (recipesListFromDb.isEmpty()) {
             recipeApi.fetchPopularRecipes(number, page)
@@ -57,6 +59,7 @@ class RecipeRepository @Inject constructor(
         number: Int, page: Int,
         onError: (message: String, error: Error) -> Unit
     ) = flow {
+        delay(1000)
         val recipesListFromDb = recipeDao.getRecipeListByType(page * 10, "breakfast")
         if (recipesListFromDb.isEmpty()) {
             recipeApi.fetchRecipesByType(number, page)

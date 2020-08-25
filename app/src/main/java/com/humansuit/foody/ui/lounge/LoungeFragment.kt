@@ -1,16 +1,18 @@
 package com.humansuit.foody.ui.lounge
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
 import com.humansuit.foody.databinding.FragmentLoungeBinding
 import com.humansuit.foody.model.RecipeSection
 import com.humansuit.foody.ui.adapter.RecipeSectionAdapter
+import com.humansuit.foody.utils.Event
+import com.humansuit.foody.utils.MergedRecipes
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -36,8 +38,11 @@ class LoungeFragment : Fragment() {
 
         val recipeSectionAdapter = RecipeSectionAdapter(viewModel)
         val recipeSectionList = arrayListOf<RecipeSection>()
-        val observeList = { data: Any ->
-            Observer.observeData(
+        val observePaginationList = { data: MergedRecipes ->
+            LoungeObserver.observePaginationLivaData(data, recipeSectionAdapter)
+        }
+        val observeInitialList = { data: Event<MergedRecipes> ->
+            LoungeObserver.observeInitialLiveData(
                 data, recipeSectionList,
                 recipeSectionAdapter,
                 removeObservers = { viewModel.initialListLiveData.removeObservers(viewLifecycleOwner) }
@@ -46,20 +51,23 @@ class LoungeFragment : Fragment() {
 
         viewModel.apply {
             loadInitialRecipeSections()
-            initialListLiveData.observe(viewLifecycleOwner) { data -> observeList(data) }
-            paginationListLivaData.observe(viewLifecycleOwner) { data -> observeList(data) }
-        }
-
-
-        viewModel.errorLiveData.observe(viewLifecycleOwner) { error ->
-            binding.recipeList.visibility = View.GONE
-            binding.errorLayout.root.visibility = View.VISIBLE
-            binding.errorLayout.error = error
+            initialListLiveData.observe(viewLifecycleOwner) { data -> observeInitialList(data) }
+            paginationListLivaData.observe(viewLifecycleOwner) { data -> observePaginationList(data) }
+            errorLiveData.observe(viewLifecycleOwner) { error ->
+                binding.recipeList.alpha = 0.2F
+                //binding.errorLayout.error = error
+            }
         }
 
         binding.apply {
             viewModel = this@LoungeFragment.viewModel
             loungeRecipeList.adapter = recipeSectionAdapter
+            errorLayout.retryButton.setOnClickListener {
+                this@LoungeFragment.viewModel.apply {
+                    isErrorState.value = false
+                    loadInitialRecipeSections()
+                }
+            }
         }
     }
 

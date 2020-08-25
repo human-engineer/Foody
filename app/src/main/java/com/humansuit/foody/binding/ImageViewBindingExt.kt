@@ -31,6 +31,6 @@ fun ImageView.loadImageResource(imageResource: Int) {
 
 
 @BindingAdapter("gone")
-fun ProgressBar.bindGone(state: Boolean) {
+fun View.bindGone(state: Boolean) {
     this.visibility = if (state) View.VISIBLE else View.GONE
 }
