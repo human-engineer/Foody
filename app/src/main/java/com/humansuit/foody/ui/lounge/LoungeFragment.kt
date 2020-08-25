@@ -4,12 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
 import com.humansuit.foody.databinding.FragmentLoungeBinding
 import com.humansuit.foody.model.RecipeSection
+import com.humansuit.foody.ui.BaseFragment
 import com.humansuit.foody.ui.adapter.RecipeSectionAdapter
 import com.humansuit.foody.utils.Event
 import com.humansuit.foody.utils.MergedRecipes
@@ -17,7 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
-class LoungeFragment : Fragment() {
+class LoungeFragment : BaseFragment() {
 
     private val TAG = this.javaClass.name
     private lateinit var binding: FragmentLoungeBinding
@@ -38,6 +37,7 @@ class LoungeFragment : Fragment() {
 
         val recipeSectionAdapter = RecipeSectionAdapter(viewModel)
         val recipeSectionList = arrayListOf<RecipeSection>()
+        val removeObserverClosure = { viewModel.initialListLiveData.removeObservers(viewLifecycleOwner) }
         val observePaginationList = { data: MergedRecipes ->
             LoungeObserver.observePaginationLivaData(data, recipeSectionAdapter)
         }
@@ -45,7 +45,7 @@ class LoungeFragment : Fragment() {
             LoungeObserver.observeInitialLiveData(
                 data, recipeSectionList,
                 recipeSectionAdapter,
-                removeObservers = { viewModel.initialListLiveData.removeObservers(viewLifecycleOwner) }
+                removeObserverClosure
             )
         }
 
@@ -55,6 +55,7 @@ class LoungeFragment : Fragment() {
             paginationListLivaData.observe(viewLifecycleOwner) { data -> observePaginationList(data) }
             errorLiveData.observe(viewLifecycleOwner) { error ->
                 binding.recipeList.alpha = 0.2F
+                showErrorDialog()
                 //binding.errorLayout.error = error
             }
         }
