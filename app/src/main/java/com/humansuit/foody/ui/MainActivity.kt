@@ -1,14 +1,19 @@
 package com.humansuit.foody.ui
 
 import android.os.Bundle
+import android.os.Message
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
+import com.andrognito.flashbar.Flashbar
+import com.andrognito.flashbar.anim.FlashAnim
 import com.google.android.material.navigation.NavigationView
 import com.humansuit.foody.R
 import com.humansuit.foody.databinding.ActivityMainBinding

@@ -1,5 +1,6 @@
 package com.humansuit.foody.ui.lounge
 
+import com.humansuit.foody.model.Error
 import com.humansuit.foody.model.Recipe
 import com.humansuit.foody.model.RecipeSection
 import com.humansuit.foody.ui.adapter.RecipeSectionAdapter
@@ -9,6 +10,7 @@ import com.humansuit.foody.utils.RecipeSectionType
 
 
 object LoungeObserver {
+
 
     fun observeInitialLiveData(
         data: Event<MergedRecipes>,

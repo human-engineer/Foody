@@ -4,9 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
+import com.humansuit.foody.binding.showErrorSnackBar
 import com.humansuit.foody.databinding.FragmentLoungeBinding
+import com.humansuit.foody.model.Error
 import com.humansuit.foody.model.RecipeSection
 import com.humansuit.foody.ui.BaseFragment
 import com.humansuit.foody.ui.adapter.RecipeSectionAdapter
@@ -49,26 +53,22 @@ class LoungeFragment : BaseFragment() {
             )
         }
 
+        val observeErrorState = { error: Error ->
+            binding.root.showErrorSnackBar(error.message) {
+                Toast.makeText(requireContext(), "Hello", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         viewModel.apply {
             loadInitialRecipeSections()
             initialListLiveData.observe(viewLifecycleOwner) { data -> observeInitialList(data) }
             paginationListLivaData.observe(viewLifecycleOwner) { data -> observePaginationList(data) }
-            errorLiveData.observe(viewLifecycleOwner) { error ->
-                binding.recipeList.alpha = 0.2F
-                showErrorDialog()
-                //binding.errorLayout.error = error
-            }
+            errorLiveData.observe(viewLifecycleOwner) { error -> observeErrorState(error)}
         }
 
         binding.apply {
             viewModel = this@LoungeFragment.viewModel
             loungeRecipeList.adapter = recipeSectionAdapter
-            errorLayout.retryButton.setOnClickListener {
-                this@LoungeFragment.viewModel.apply {
-                    isErrorState.value = false
-                    loadInitialRecipeSections()
-                }
-            }
         }
     }
 

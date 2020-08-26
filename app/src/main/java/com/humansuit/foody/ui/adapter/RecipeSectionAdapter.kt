@@ -31,13 +31,11 @@ class RecipeSectionAdapter(private val viewModel: LoungeViewModel)
         }
     }
 
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = RecipeSectionBinding.inflate(inflater, parent, false)
         return CustomViewHolder(binding)
     }
-
 
     override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
         val currentRecipeSection = getItem(position)
@@ -59,7 +57,6 @@ class RecipeSectionAdapter(private val viewModel: LoungeViewModel)
         }
     }
 
-
     fun addMoreRecipes(recipeList: List<Recipe>, sectionType: RecipeSectionType) {
         currentList.find { it.recipeSectionType == sectionType }?.let { recipeSection ->
             val sectionBinding = viewHolderBindings[recipeSection.recipeSectionType] as RecipeSectionBinding
@@ -71,7 +68,6 @@ class RecipeSectionAdapter(private val viewModel: LoungeViewModel)
         }
     }
 
-
     private fun getRecyclerViewOnScrollListener(
         layoutManager: LinearLayoutManager,
         recipeSection: RecipeSection
@@ -81,7 +77,11 @@ class RecipeSectionAdapter(private val viewModel: LoungeViewModel)
             Timber.d("Scrolled to the end of the ${recipeSection.recipeSectionType} section. Loading more data...")
             viewModel.apply {
                 isDataLoading = true
-                loadNextSectionPage(recipeSection, recipeSection.currentPage + 1)
+                loadNextSectionPage(
+                    recipeSection.recipeSectionType,
+                    recipeSection.currentPage + 1,
+                    recipeSection.pageSize
+                )
                 isDataLoading = false
             }
         }

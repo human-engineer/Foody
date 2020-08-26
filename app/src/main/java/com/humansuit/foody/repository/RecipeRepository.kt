@@ -3,18 +3,21 @@ package com.humansuit.foody.repository
 import com.humansuit.foody.R
 import com.humansuit.foody.database.RecipeDao
 import com.humansuit.foody.model.Error
+import com.humansuit.foody.model.RecipeLoadingState
+import com.humansuit.foody.model.response.PopularRecipesResponse
+import com.humansuit.foody.model.response.TypedRecipeResponse
 import com.humansuit.foody.network.RecipeApi
 import com.humansuit.foody.utils.Constants.ErrorMessage.ON_ERROR
 import com.humansuit.foody.utils.Constants.ErrorMessage.ON_EXCEPTION
 import com.humansuit.foody.utils.Constants.ErrorMessage.ON_FAILURE
-import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
-import com.skydoves.sandwich.onFailure
-import com.skydoves.sandwich.suspendOnSuccess
+import com.humansuit.foody.utils.MergedRecipes
+import com.humansuit.foody.utils.RecipeSectionType
+import com.skydoves.sandwich.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import okhttp3.ResponseBody
 import javax.inject.Inject
 
 class RecipeRepository @Inject constructor(
@@ -29,6 +32,10 @@ class RecipeRepository @Inject constructor(
         onError: (message: String, error: Error) -> Unit
     ) = flow {
         delay(1000)
+        val recipeLoadingState = RecipeLoadingState(
+            RecipeSectionType.POPULAR_RECIPE,
+            number, page
+        )
         val recipesListFromDb = recipeDao.getPopularRecipeList(page * 10)
         if (recipesListFromDb.isEmpty()) {
             recipeApi.fetchPopularRecipes(number, page)
@@ -40,15 +47,15 @@ class RecipeRepository @Inject constructor(
                     }
                 }
                 .onError {
-                    val error = Error(ON_ERROR, R.drawable.ic_error)
+                    val error = Error(ON_ERROR, R.drawable.ic_error, recipeLoadingState)
                     onError(errorBody.toString(), error)
                 }
                 .onFailure {
-                    val error = Error(ON_FAILURE, R.drawable.ic_error)
+                    val error = Error(ON_FAILURE, R.drawable.ic_error, recipeLoadingState)
                     onError("Unknown failure", error)
                 }
                 .onException {
-                    val error = Error(ON_EXCEPTION, R.drawable.ic_error)
+                    val error = Error(ON_EXCEPTION, R.drawable.ic_error, recipeLoadingState)
                     onError(exception.message.toString(), error)
                 }
         } else emit(recipesListFromDb)
@@ -60,6 +67,10 @@ class RecipeRepository @Inject constructor(
         onError: (message: String, error: Error) -> Unit
     ) = flow {
         delay(1000)
+        val recipeLoadingState = RecipeLoadingState(
+            RecipeSectionType.BREAKFAST_RECIPE,
+            number, page
+        )
         val recipesListFromDb = recipeDao.getRecipeListByType(page * 10, "breakfast")
         if (recipesListFromDb.isEmpty()) {
             recipeApi.fetchRecipesByType(number, page)
@@ -71,15 +82,15 @@ class RecipeRepository @Inject constructor(
                     }
                 }
                 .onError {
-                    val error = Error(ON_ERROR, R.drawable.ic_error)
+                    val error = Error(ON_ERROR, R.drawable.ic_error, recipeLoadingState)
                     onError(errorBody.toString(), error)
                 }
                 .onFailure {
-                    val error = Error(ON_FAILURE, R.drawable.ic_error)
+                    val error = Error(ON_FAILURE, R.drawable.ic_error, recipeLoadingState)
                     onError("Unknown failure", error)
                 }
                 .onException {
-                    val error = Error(ON_EXCEPTION, R.drawable.ic_error)
+                    val error = Error(ON_EXCEPTION, R.drawable.ic_error, recipeLoadingState)
                     onError(exception.message.toString(), error)
                 }
         } else emit(recipesListFromDb)
@@ -125,5 +136,15 @@ class RecipeRepository @Inject constructor(
             emit(recipesListFromDb)
         }
     }.flowOn(Dispatchers.IO)
+
+
+    private suspend fun startFetching(apiResponse: ApiResponse<*>, recipeSectionType: RecipeSectionType) {
+        try {
+            when(recipeSectionType) {
+                RecipeSectionType.POPULAR_RECIPE -> { apiResponse as ApiResponse<PopularRecipesResponse> }
+                RecipeSectionType.BREAKFAST_RECIPE -> { apiResponse as ApiResponse<TypedRecipeResponse> }
+            }
+        }
+    }
 
 }

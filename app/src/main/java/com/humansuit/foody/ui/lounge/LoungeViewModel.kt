@@ -59,20 +59,14 @@ class LoungeViewModel @ViewModelInject constructor(
     }
 
 
-    fun loadNextSectionPage(recipeSection: RecipeSection, page: Int) = viewModelScope.launch {
+    fun loadNextSectionPage(recipeSectionType: RecipeSectionType, page: Int, pageSize: Int) = viewModelScope.launch {
         Timber.tag(TAG).d("Loading next section page.")
-        when(recipeSection.recipeSectionType) {
+        when(recipeSectionType) {
             RecipeSectionType.POPULAR_RECIPE -> {
-                loadPopularRecipes(
-                    number = recipeSection.pageSize,
-                    page = page
-                )
+                loadPopularRecipes(number = pageSize, page = page)
             }
             RecipeSectionType.BREAKFAST_RECIPE -> {
-                loadBreakfastRecipes(
-                    number = recipeSection.pageSize,
-                    page = page
-                )
+                loadBreakfastRecipes(number = pageSize, page = page)
             }
         }
     }
@@ -105,7 +99,7 @@ class LoungeViewModel @ViewModelInject constructor(
                 onError = { message, error ->
                     API_ERROR_LOG("Error while fetching popular recipe: $message")
                     errorLiveData.postValue(error)
-                    //isErrorState.postValue(true)
+                    progressBarState.postValue(false)
                 }
             )
         }
@@ -118,7 +112,7 @@ class LoungeViewModel @ViewModelInject constructor(
                 onError = { message, error  ->
                     API_ERROR_LOG("Error while fetching breakfast recipe: $message")
                     errorLiveData.postValue(error)
-                    //isErrorState.postValue(true)
+                    progressBarState.postValue(false)
                 }
             )
         }
