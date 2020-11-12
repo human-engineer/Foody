@@ -5,13 +5,12 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.humansuit.foody.model.Error
 import com.humansuit.foody.model.Recipe
-import com.humansuit.foody.model.RecipeSection
 import com.humansuit.foody.repository.RecipeRepository
 import com.humansuit.foody.utils.Constants.API_ERROR_LOG
 import com.humansuit.foody.utils.Constants.RECIPE_PAGE_SIZE
 import com.humansuit.foody.utils.Event
-import com.humansuit.foody.utils.MergedRecipes
-import com.humansuit.foody.utils.RecipeSectionType
+import com.humansuit.foody.model.MergedRecipes
+import com.humansuit.foody.model.RecipeSectionType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine

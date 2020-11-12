@@ -1,4 +1,4 @@
-package com.humansuit.foody.utils
+package com.humansuit.foody.model
 
 enum class RecipeSectionType(val id: Int, val title: String) {
 

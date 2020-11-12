@@ -1,7 +1,6 @@
 package com.humansuit.foody.model
 
 import com.humansuit.foody.utils.Constants.RECIPE_PAGE_SIZE
-import com.humansuit.foody.utils.RecipeSectionType
 
 data class RecipeSection(
     val id: Int,

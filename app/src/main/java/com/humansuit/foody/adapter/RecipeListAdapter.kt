@@ -1,4 +1,4 @@
-package com.humansuit.foody.ui.adapter
+package com.humansuit.foody.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

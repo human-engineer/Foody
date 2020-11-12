@@ -4,20 +4,16 @@ import com.humansuit.foody.R
 import com.humansuit.foody.database.RecipeDao
 import com.humansuit.foody.model.Error
 import com.humansuit.foody.model.RecipeLoadingState
-import com.humansuit.foody.model.response.PopularRecipesResponse
-import com.humansuit.foody.model.response.TypedRecipeResponse
 import com.humansuit.foody.network.RecipeApi
 import com.humansuit.foody.utils.Constants.ErrorMessage.ON_ERROR
 import com.humansuit.foody.utils.Constants.ErrorMessage.ON_EXCEPTION
 import com.humansuit.foody.utils.Constants.ErrorMessage.ON_FAILURE
-import com.humansuit.foody.utils.MergedRecipes
-import com.humansuit.foody.utils.RecipeSectionType
+import com.humansuit.foody.model.RecipeSectionType
 import com.skydoves.sandwich.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import okhttp3.ResponseBody
 import javax.inject.Inject
 
 class RecipeRepository @Inject constructor(
@@ -138,13 +134,13 @@ class RecipeRepository @Inject constructor(
     }.flowOn(Dispatchers.IO)
 
 
-    private suspend fun startFetching(apiResponse: ApiResponse<*>, recipeSectionType: RecipeSectionType) {
-        try {
-            when(recipeSectionType) {
-                RecipeSectionType.POPULAR_RECIPE -> { apiResponse as ApiResponse<PopularRecipesResponse> }
-                RecipeSectionType.BREAKFAST_RECIPE -> { apiResponse as ApiResponse<TypedRecipeResponse> }
-            }
-        }
-    }
+//    private suspend fun startFetching(apiResponse: ApiResponse<*>, recipeSectionType: RecipeSectionType) {
+//        try {
+//            when(recipeSectionType) {
+//                RecipeSectionType.POPULAR_RECIPE -> { apiResponse as ApiResponse<PopularRecipesResponse> }
+//                RecipeSectionType.BREAKFAST_RECIPE -> { apiResponse as ApiResponse<TypedRecipeResponse> }
+//            }
+//        }
+//    }
 
 }

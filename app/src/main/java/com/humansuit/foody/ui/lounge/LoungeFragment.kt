@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AlphaAnimation
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
@@ -13,9 +12,9 @@ import com.humansuit.foody.databinding.FragmentLoungeBinding
 import com.humansuit.foody.model.Error
 import com.humansuit.foody.model.RecipeSection
 import com.humansuit.foody.ui.BaseFragment
-import com.humansuit.foody.ui.adapter.RecipeSectionAdapter
+import com.humansuit.foody.adapter.RecipeSectionAdapter
 import com.humansuit.foody.utils.Event
-import com.humansuit.foody.utils.MergedRecipes
+import com.humansuit.foody.model.MergedRecipes
 import dagger.hilt.android.AndroidEntryPoint
 
 

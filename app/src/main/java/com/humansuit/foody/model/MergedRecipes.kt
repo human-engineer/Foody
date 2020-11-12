@@ -1,6 +1,6 @@
-package com.humansuit.foody.utils
+package com.humansuit.foody.model
 
-import com.humansuit.foody.model.Recipe
+import com.humansuit.foody.utils.Event
 
 sealed class MergedRecipes {
 

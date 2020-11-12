@@ -1,12 +1,11 @@
 package com.humansuit.foody.ui.lounge
 
-import com.humansuit.foody.model.Error
 import com.humansuit.foody.model.Recipe
 import com.humansuit.foody.model.RecipeSection
-import com.humansuit.foody.ui.adapter.RecipeSectionAdapter
+import com.humansuit.foody.adapter.RecipeSectionAdapter
 import com.humansuit.foody.utils.Event
-import com.humansuit.foody.utils.MergedRecipes
-import com.humansuit.foody.utils.RecipeSectionType
+import com.humansuit.foody.model.MergedRecipes
+import com.humansuit.foody.model.RecipeSectionType
 
 
 object LoungeObserver {

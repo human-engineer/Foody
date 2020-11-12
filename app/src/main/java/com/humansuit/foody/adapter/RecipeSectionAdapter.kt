@@ -1,4 +1,4 @@
-package com.humansuit.foody.ui.adapter
+package com.humansuit.foody.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -7,13 +7,15 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.humansuit.foody.database.RecipesDatabase
 import com.humansuit.foody.databinding.RecipeSectionBinding
 import com.humansuit.foody.model.Recipe
 import com.humansuit.foody.model.RecipeSection
 import com.humansuit.foody.ui.lounge.LoungeViewModel
 import com.humansuit.foody.utils.CustomViewHolder
-import com.humansuit.foody.utils.RecipeSectionType
+import com.humansuit.foody.model.RecipeSectionType
 import com.humansuit.foody.utils.RecyclerViewPaginator
+import com.wajahatkarim3.roomexplorer.RoomExplorer
 import timber.log.Timber
 
 class RecipeSectionAdapter(private val viewModel: LoungeViewModel)
@@ -48,6 +50,7 @@ class RecipeSectionAdapter(private val viewModel: LoungeViewModel)
 
         binding.apply {
             recipeSection = currentRecipeSection
+            moreButton.setOnClickListener { RoomExplorer.show(binding.root.context, RecipesDatabase::class.java, "recipes.db") }
             recipeRecyclerView.setHasFixedSize(true)
             recipeRecyclerView.setItemViewCacheSize(20)
             recipeRecyclerView.setRecycledViewPool(viewPool)
