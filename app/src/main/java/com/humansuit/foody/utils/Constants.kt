@@ -9,6 +9,7 @@ object Constants {
 
     const val RECIPES_BASE_URL = "https://api.spoonacular.com/recipes/"
     const val RECIPE_PAGE_SIZE = 10
+    const val AMOUNT_OF_PAGES = 5
 
     object ErrorMessage {
 

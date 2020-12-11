@@ -43,7 +43,7 @@ class RecipeSectionAdapter(private val viewModel: LoungeViewModel)
         val currentRecipeSection = getItem(position)
         val binding = holder.binding as RecipeSectionBinding
         val layoutManager = binding.recipeRecyclerView.layoutManager
-        val scrollListener = getRecyclerViewOnScrollListener(
+        val scrollListener = createRecyclerViewOnScrollListener(
             layoutManager = layoutManager as LinearLayoutManager,
             recipeSection = currentRecipeSection
         )
@@ -71,7 +71,7 @@ class RecipeSectionAdapter(private val viewModel: LoungeViewModel)
         }
     }
 
-    private fun getRecyclerViewOnScrollListener(
+    private fun createRecyclerViewOnScrollListener(
         layoutManager: LinearLayoutManager,
         recipeSection: RecipeSection
     ) = object : RecyclerViewPaginator(layoutManager) {
@@ -81,9 +81,9 @@ class RecipeSectionAdapter(private val viewModel: LoungeViewModel)
             viewModel.apply {
                 isDataLoading = true
                 loadNextSectionPage(
-                    recipeSection.recipeSectionType,
-                    recipeSection.currentPage + 1,
-                    recipeSection.pageSize
+                    recipeSectionType = recipeSection.recipeSectionType,
+                    page = recipeSection.currentPage + 1,
+                    pageSize = recipeSection.pageSize
                 )
                 isDataLoading = false
             }

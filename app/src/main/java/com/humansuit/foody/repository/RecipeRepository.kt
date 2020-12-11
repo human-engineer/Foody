@@ -63,10 +63,7 @@ class RecipeRepository @Inject constructor(
         onError: (message: String, error: Error) -> Unit
     ) = flow {
         delay(1000)
-        val recipeLoadingState = RecipeLoadingState(
-            RecipeSectionType.BREAKFAST_RECIPE,
-            number, page
-        )
+        val recipeLoadingState = RecipeLoadingState(RecipeSectionType.BREAKFAST_RECIPE, number, page)
         val recipesListFromDb = recipeDao.getRecipeListByType(page * 10, "breakfast")
         if (recipesListFromDb.isEmpty()) {
             recipeApi.fetchRecipesByType(number, page)
@@ -132,15 +129,5 @@ class RecipeRepository @Inject constructor(
             emit(recipesListFromDb)
         }
     }.flowOn(Dispatchers.IO)
-
-
-//    private suspend fun startFetching(apiResponse: ApiResponse<*>, recipeSectionType: RecipeSectionType) {
-//        try {
-//            when(recipeSectionType) {
-//                RecipeSectionType.POPULAR_RECIPE -> { apiResponse as ApiResponse<PopularRecipesResponse> }
-//                RecipeSectionType.BREAKFAST_RECIPE -> { apiResponse as ApiResponse<TypedRecipeResponse> }
-//            }
-//        }
-//    }
 
 }

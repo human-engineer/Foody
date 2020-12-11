@@ -33,9 +33,9 @@
                 android:layout_toStartOf="@+id/moreButton"
                 android:fontFamily="sans-serif-medium"
                 android:gravity="center"
-                android:text="@{ recipeSection.title }"
                 android:textAlignment="viewStart"
-                android:textSize="17sp" />
+                android:textSize="17sp"
+                tools:text="@tools:sample/cities" />
 
             <Button
                 android:id="@+id/moreButton"

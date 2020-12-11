@@ -23,5 +23,4 @@ object RepositoryModule {
         return RecipeRepository(recipeApi, recipeDao)
     }
 
-
 }
