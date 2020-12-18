@@ -49,12 +49,13 @@ class RecipeSectionAdapter(private val viewModel: LoungeViewModel)
         )
 
         binding.apply {
+            recipeRecyclerView.apply {
+                setHasFixedSize(true)
+                setItemViewCacheSize(20)
+                setRecycledViewPool(viewPool)
+                addOnScrollListener(scrollListener)
+            }
             recipeSection = currentRecipeSection
-            moreButton.setOnClickListener { RoomExplorer.show(binding.root.context, RecipesDatabase::class.java, "recipes.db") }
-            recipeRecyclerView.setHasFixedSize(true)
-            recipeRecyclerView.setItemViewCacheSize(20)
-            recipeRecyclerView.setRecycledViewPool(viewPool)
-            recipeRecyclerView.addOnScrollListener(scrollListener)
             viewHolderBindings[currentRecipeSection.recipeSectionType] = this
             executePendingBindings()
         }
