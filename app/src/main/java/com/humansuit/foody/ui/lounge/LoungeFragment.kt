@@ -68,6 +68,7 @@ class LoungeFragment : BaseFragment() {
         binding.apply {
             viewModel = this@LoungeFragment.viewModel
             loungeRecipeList.adapter = recipeSectionAdapter
+
         }
     }
 
